@@ -377,10 +377,10 @@ class BasisGaussianModel:
         n_init_points = self.get_xyz.shape[0]
         # Extract points that satisfy the gradient condition
         padded_grad = torch.zeros((n_init_points), device="cuda")
-        padded_grad[:grads.shape[0]] = grads.squeeze()### 因为前面是clone。所以这一步，只去前面的点，不取后面没有被克隆的点。
+        padded_grad[:grads.shape[0]] = grads.squeeze()###      clone。     ，      ，           。
         selected_pts_mask = torch.where(padded_grad >= grad_threshold, True, False)
         selected_pts_mask = torch.logical_and(selected_pts_mask,
-                                              torch.max(self.get_scaling, dim=1).values > self.percent_dense*scene_extent) ## 大于一定的scale
+                                              torch.max(self.get_scaling, dim=1).values > self.percent_dense*scene_extent) ##      scale
 
         # print(grads.shape)
         # print(selected_pts_mask.shape)
@@ -404,9 +404,9 @@ class BasisGaussianModel:
 
     def densify_and_clone(self, grads, grad_threshold, scene_extent):
         # Extract points that satisfy the gradient condition
-        selected_pts_mask = torch.where(torch.norm(grads, dim=-1) >= grad_threshold, True, False) ## 梯度大于阈值。
+        selected_pts_mask = torch.where(torch.norm(grads, dim=-1) >= grad_threshold, True, False) ##       。
         selected_pts_mask = torch.logical_and(selected_pts_mask,
-                                              torch.max(self.get_scaling, dim=1).values <= self.percent_dense*scene_extent)## scale小于一定尺度。 ## 这里的dim1是什么？
+                                              torch.max(self.get_scaling, dim=1).values <= self.percent_dense*scene_extent)## scale      。 ##    dim1   ？
         
         new_xyz = self._xyz[selected_pts_mask]
         new_features_dc = self._features_dc[selected_pts_mask]
@@ -424,10 +424,10 @@ class BasisGaussianModel:
         self.densify_and_clone(grads, max_grad, extent)
         self.densify_and_split(grads, max_grad, extent)
 
-        prune_mask = (self.get_opacity < min_opacity).squeeze() ## opacity 过小
+        prune_mask = (self.get_opacity < min_opacity).squeeze() ## opacity   
         if max_screen_size:
-            big_points_vs = self.max_radii2D > max_screen_size ## 屏幕空间的点过大。
-            big_points_ws = self.get_scaling.max(dim=1).values > 0.1 * extent ## 世界坐标系下面过大
+            big_points_vs = self.max_radii2D > max_screen_size ##         。
+            big_points_ws = self.get_scaling.max(dim=1).values > 0.1 * extent ##          
             prune_mask = torch.logical_or(torch.logical_or(prune_mask, big_points_vs), big_points_ws)
         self.prune_points(prune_mask)
 

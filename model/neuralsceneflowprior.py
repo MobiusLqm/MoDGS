@@ -162,7 +162,7 @@ class Neural_InverseTrajectory_Trainer(BasicTrainer):
             dir = self.out_dir
         ckpt_list = glob(os.path.join(dir, '*_model.pth'))
         
-        ## 最大的迭代次数ckpt是
+        ##        ckpt 
         max_iter = 0
         for ckpt in ckpt_list:
             iter = int(os.path.basename(ckpt).split('_')[0])
@@ -187,7 +187,7 @@ class Neural_InverseTrajectory_Trainer(BasicTrainer):
         if self.args.stage1_max_steps>=step and keep_optimzer:
             state_dict["optimizer"]= self.optimizer.state_dict()
             state_dict["scheduler"]= self.scheduler.state_dict()
-        # else: ## 不保存
+        # else: ##    
         torch.save(state_dict, os.path.join(self.out_dir, f'{step}_model.pth'))
     def to_eval(self,):
         self.feature_mlp.eval()
@@ -239,7 +239,7 @@ class Neural_InverseTrajectory_Trainer(BasicTrainer):
         return val_l2loss
     def forward_to_canonical(self, x,t): 
         """ 
-        从时间t帧的点坐标x转换到时间t0的标准空间点坐标。
+           t     x     t0        。
             [B, N, 3] -> [B,N,3]
             
         t：##torch.Size([B, 1])
@@ -250,7 +250,7 @@ class Neural_InverseTrajectory_Trainer(BasicTrainer):
         
         return x,time_feature
     def inverse_cycle_t(self, x,t, time_feature):
-        """反向到同一个时刻,这个时候用在fwd时间步得到的time feature ，不用再次计算。
+        """        ,      fwd      time feature ，      。
 
         Args:
             x (_type_): _description_
@@ -264,7 +264,7 @@ class Neural_InverseTrajectory_Trainer(BasicTrainer):
         return x
     
     def inverse_other_t(self, x,t):
-        """反向到其他时刻,这个时候需要再次计算time_feature"""
+        """       ,          time_feature"""
         time_feature = self.feature_mlp(t)#torch.Size([B, feature_dim])
         x = self.deform_mlp.inverse(t,time_feature,x) 
         return x

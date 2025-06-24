@@ -24,7 +24,7 @@ import os
 def reprojection2another_cam(uv,depth,cam1_c2w,cam2_c2w,intrinsic):
     """cam1_c2w:4by4 matrix:  cam1_c2w@P_c =P_w
     
-    ## uv: 先x方向后y方向
+    ## uv:  x   y  
     """
     
     ###Unprojecting uv at cam1 to world xyz

@@ -65,7 +65,7 @@ def Render_vis_cams(args,dataset_args:PointTrackModelParams,opt:PointTrackOptimi
     
     args.outdir = os.path.dirname(checkpoint)
     outdir= args.outdir
-    dataset_args.Factor_ColmapDepthAlign =args.Factor_ColmapDepthAlign  ## 2024年5月12日完与LIU YUAN讨论之后的结果。
+    dataset_args.Factor_ColmapDepthAlign =args.Factor_ColmapDepthAlign  ## 2024 5 12   LIU YUAN       。
     ######
     ###### 
     # net_args.timestamp=args.timestamp
@@ -174,7 +174,7 @@ def Render_vis_cams(args,dataset_args:PointTrackModelParams,opt:PointTrackOptimi
             image_name = cam.image_name
             
             alpha_msk = render_alpha>0.5
-            depth = torch.clamp(minmax_norm(render_depth,torch.quantile(render_depth,0.01),torch.quantile(render_depth,0.99)),0,1) ###TODO: 为了ablation visualization
+            depth = torch.clamp(minmax_norm(render_depth,torch.quantile(render_depth,0.01),torch.quantile(render_depth,0.99)),0,1) ###TODO:   ablation visualization
 
             time_folder = "%05d"%idx
             if not os.path.exists(os.path.join(outdir,f"viscam_len{len(test_cams)}")):

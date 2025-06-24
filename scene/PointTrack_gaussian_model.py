@@ -397,7 +397,7 @@ class TimeTableGaussianModel:
         xyz = gaussian_t[not_nan_mask, :3]
         rgb= gaussian_t[not_nan_mask, 3:6]
         # rgb=torch.ones_like(rgb)
-        ## FIXME: 以后删除这一行
+        ## FIXME:        
         LQM_DEBUG_SCALE_FACTOR=1
         xyz=xyz.contiguous().float().cuda()*LQM_DEBUG_SCALE_FACTOR
         rgb=rgb.contiguous().float().cuda()
@@ -499,7 +499,7 @@ class Original_GaussianModel:
         self.optimizer.load_state_dict(opt_dict)
     @property    
     def get_normals(self,):
-        #TODO 以后要改，现在直接返回【0,0,1】
+        #TODO     ，      【0,0,1】
         if not (hasattr(self,"normals") and self.normals.shape[0]==self._xyz.shape[0]):
             self.normals = torch.zeros_like(self._xyz)
             self.normals[:,2]=1
@@ -894,7 +894,7 @@ class PointTrackIsotropicGaussianModel(Original_GaussianModel):
         denom,
         opt_dict, 
         self.spatial_lr_scale) = model_args
-        self._scaling=_scaling[:,:1] ## TODO: 这里的scaling是不是明明是一个值，但是我还是存了三个。
+        self._scaling=_scaling[:,:1] ## TODO:    scaling         ，         。
         
         self.training_setup(training_args)
         self.xyz_gradient_accum = xyz_gradient_accum
@@ -958,7 +958,7 @@ class PointTrackIsotropicGaussianModel(Original_GaussianModel):
             {'params': [self._scaling], 'lr': training_args.scaling_lr, "name": "scaling"},
             # {'params': [self._rotation], 'lr': training_args.rotation_lr, "name": "rotation"}
         ]
-        ## FIXME: 2024年5月18日15:09:51，为了dubug
+        ## FIXME: 2024 5 18 15:09:51，  dubug
         # try:
         self.optimizer = torch.optim.Adam(l, lr=0.0, eps=1e-15)
         self.xyz_scheduler_args = get_expon_lr_func(lr_init=training_args.position_lr_init*self.spatial_lr_scale,
@@ -990,7 +990,7 @@ class PointTrackIsotropicGaussianModel(Original_GaussianModel):
         f_dc = self._features_dc.detach().transpose(1, 2).flatten(start_dim=1).contiguous().cpu().numpy()
         f_rest = self._features_rest.detach().transpose(1, 2).flatten(start_dim=1).contiguous().cpu().numpy()
         opacities = self._opacity.detach().cpu().numpy()
-        scale = self.get_scaling_noact.detach().cpu().numpy() ## scale 只需要保存一个数值，但是还是保存了三次
+        scale = self.get_scaling_noact.detach().cpu().numpy() ## scale          ，         
         rotation = self._rotation.detach().cpu().numpy()
 
         dtype_full = [(attribute, 'f4') for attribute in self.construct_list_of_attributes()]

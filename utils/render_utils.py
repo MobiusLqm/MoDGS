@@ -9,43 +9,43 @@ from scipy.spatial.transform import Slerp
 import numpy as np
 
 def generate_spiral_poses(radii, height, n_rotations, n_poses):
-    # 生成等间隔的角度
+    #         
     angles = np.linspace(0, 2*np.pi*n_rotations, n_poses)
     
-    # 计算每个点的位置
+    #         
     x = radii * np.cos(angles)
     y = radii * np.sin(angles)
     z = np.linspace(-height/2, height/2, n_poses)
     
-    # 创建一个空的姿态矩阵
+    #           
     poses = np.empty((n_poses, 4, 4))
     
-    # 填充姿态矩阵
+    #       
     for i in range(n_poses):
-        # 创建一个单位矩阵
+        #         
         poses[i] = np.eye(4)
         
-        # 设置位置
+        #     
         poses[i, :3, 3] = [x[i], y[i], z[i]]
         
-        # 设置方向
+        #     
         poses[i, :3, :3] = look_at([x[i], y[i], z[i]], [0, 0, 0])
         
     return poses
 
 def look_at(position, target):
-    # 计算前向向量
+    #       
     forward = np.array(target) - np.array(position)
     forward /= np.linalg.norm(forward)
     
-    # 计算右向量
+    #      
     right = np.cross([0, 0, 1], forward)
     right /= np.linalg.norm(right)
     
-    # 计算上向量
+    #      
     up = np.cross(forward, right)
     
-    # 创建旋转矩阵
+    #       
     rotation = np.stack([right, up, forward])
     
     return rotation
@@ -79,7 +79,7 @@ def render_path_spiral(c2w, up, rads, focal, zrate, rots, N):
 
 def forward_circle_poses(cams):
     
-    poses = [cam.view_world_transform.transpose(0, 1).numpy()[:3,:4] for cam in cams] ##cam.view_world_transform第四行是t，1形式，转换成0001形式的 C2W
+    poses = [cam.view_world_transform.transpose(0, 1).numpy()[:3,:4] for cam in cams] ##cam.view_world_transform    t，1  ，   0001    C2W
     # poses_inv = [pose_inverse(pose) for pose in poses]
     
     
@@ -91,7 +91,7 @@ def forward_circle_poses(cams):
     avg_cam_pt = (np.max(cam_pts,0)+np.min(cam_pts,0))/2
     avg_down = np.mean(down,0)
     avg_lookat = np.mean(lookat,0)
-    avg_pose_inv = viewmatrix(avg_lookat, avg_down, avg_cam_pt) ## 带有 inv的都是c2w?
+    avg_pose_inv = viewmatrix(avg_lookat, avg_down, avg_cam_pt) ##    inv   c2w?
     avg_pose = pose_inverse(avg_pose_inv)
 
     cam_pts_in_avg_pose = transform_points_Rt(cam_pts,avg_pose[:,:3],avg_pose[:,3]) # n,3
@@ -115,11 +115,11 @@ def forward_circle_poses(cams):
     return render_poses ## w2c？ N*3*4
 def forward_circle_poses_for_staticCams(cams):
     
-    poses = [cam.view_world_transform.transpose(0, 1).numpy()[:3,:4] for cam in cams] ##cam.view_world_transform第四行是t，1形式，转换成0001形式的 C2W
+    poses = [cam.view_world_transform.transpose(0, 1).numpy()[:3,:4] for cam in cams] ##cam.view_world_transform    t，1  ，   0001    C2W
     # poses_inv = [pose_inverse(pose) for pose in poses]
     
     rad_predefined = 0.1
-    pull_over_factor=1.0 ##FIXME: LQM pull over 让摄像机远离物体
+    pull_over_factor=1.0 ##FIXME: LQM pull over         
     # cam_pts = np.asarray(poses)[:, :, 3]
     cam_pts = np.asarray(poses)[:, :, 3]*pull_over_factor ##FIXME: LQM pull over
     cam_rots = np.asarray(poses)[:, :, :3]
@@ -130,7 +130,7 @@ def forward_circle_poses_for_staticCams(cams):
     avg_cam_pt = (np.max(cam_pts,0)+np.min(cam_pts,0))/2
     avg_down = np.mean(down,0)
     avg_lookat = np.mean(lookat,0)
-    avg_pose_inv = viewmatrix(avg_lookat, avg_down, avg_cam_pt) ## 带有 inv的都是c2w?
+    avg_pose_inv = viewmatrix(avg_lookat, avg_down, avg_cam_pt) ##    inv   c2w?
     avg_pose = pose_inverse(avg_pose_inv)
 
     cam_pts_in_avg_pose = transform_points_Rt(cam_pts,avg_pose[:,:3],avg_pose[:,3]) # n,3

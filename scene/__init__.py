@@ -316,10 +316,10 @@ class PointTrackScene:
                                                             exhaustive_training=args.exhaustive_training,use_depthNonEdgeMsk=args.use_depthNonEdgeMsk )
             if os.path.exists(os.path.join(args.source_path,"sparse","colmap_to_depth_scale.json")):
                 colmap_scene_info  = sceneLoadTypeCallbacks["read_Nvidia_cam_info"](args.source_path,)
-                align_metric_cameras = True ## For metric evaluation.  表示有 colmap scene info ，需要去校准。
+                align_metric_cameras = True ## For metric evaluation.      colmap scene info ，     。
             if os.path.exists(os.path.join(args.source_path,"colmap_to_depth_scale.json")):
                 colmap_scene_info  = sceneLoadTypeCallbacks["read_DyNeRF_cam_info"](args.source_path,)
-                align_metric_cameras = True ## For metric evaluation.  表示有 colmap scene info ，需要去校准。
+                align_metric_cameras = True ## For metric evaluation.      colmap scene info ，     。
                 
 
         elif os.path.exists(os.path.join(args.source_path, "dataset.json")):
@@ -452,7 +452,7 @@ class PointTrackScene:
                 # break
         self.firstframeCam.append(firstcam)
         
-        ### construct camera dict  用于Exhaustive pair trainings. 需要一个dict来存储所有的cameras，便于query。
+        ### construct camera dict    Exhaustive pair trainings.     dict      cameras，  query。
         self.train_cameras_dict = {}
         train_cams = self.getTrainCameras()
         self.train_cameras_name2idx = {}
@@ -525,7 +525,7 @@ class PointTrackScene:
         """
         if pcd_time is not None and  abs(viewpoint_time.item() - pcd_time.item())<1e-6:
             return viewpoint_time.unsqueeze(0)
-        ## NOTE 2024年5月2日20:20:26 注释掉
+        ## NOTE 2024 5 2 20:20:26    
         # time =    viewpoint_time.unsqueeze(0)*float(self.Max_frame_T)/(len(self.timePcd_dataset))/self.PCD_INTERVAL
         time =    viewpoint_time.unsqueeze(0)
         return time
@@ -574,7 +574,7 @@ class PointTrackScene:
             # assert len(viewpoints)==len(pcd_pair), "Viewpoints and Pcd pair not match"
             coTraining_list= []
             for viewpoint in viewpoints: ## TODO: check the time of the viewpoint
-                index = int(int(viewpoint.image_name[-4:])/self.PCD_INTERVAL) ## 取最近的PCD
+                index = int(int(viewpoint.image_name[-4:])/self.PCD_INTERVAL) ##     PCD
                 coTraining_list.append((viewpoint,pcd_pair[index])) ## FIXME : exhaustive pairs occupy too much memory
                 # coTraining_list.append((viewpoint,copy.deepcopy(pcd_pair[index]))) ## copy.deepcopy to avoid change the original pcd_pair
         

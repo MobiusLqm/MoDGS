@@ -107,7 +107,7 @@ def get_caminfo_from_poses(poses,FovY=None,FovX=None,width=None,height=None,fix_
     for idx, pose in enumerate(poses):
         R= pose[:3,:3].T
         T=pose[:3,3]
-        if fix_time == -1: ## 时间变化，根据pose的顺序来
+        if fix_time == -1: ##     ，  pose    
             time=idx/(len(poses)-1) ## LQM:fix bugs ,align with time in readsceneInfo
             # time=id/len(poses)
             # (len(self.forward_circle_poses)-1)
@@ -283,7 +283,7 @@ def readDyColmapCameras(cam_extrinsics, cam_intrinsics, images_folder):
     import glob
     list_img=glob.glob(os.path.join(images_folder, "*.png"))+glob.glob(os.path.join(images_folder, "*.jpg"))
     len_cam = min(len(cam_extrinsics), len(list_img))
-    ##  取最小值，因为有可能有些cam intrinsics，没有对应的图片
+    ##      ，       cam intrinsics，       
     time_steps=torch.linspace(0.0, 1.0, len_cam)
     for idx, key in enumerate(cam_extrinsics):
         sys.stdout.write('\r')
@@ -297,7 +297,7 @@ def readDyColmapCameras(cam_extrinsics, cam_intrinsics, images_folder):
         width = intr.width
 
         uid = intr.id
-        R = np.transpose(qvec2rotmat(extr.qvec)) ## LQM：2024年3月24日13:33:15。这里把w2c变成c2w了？
+        R = np.transpose(qvec2rotmat(extr.qvec)) ## LQM：2024 3 24 13:33:15。   w2c  c2w ？
         T = np.array(extr.tvec)
 
         if intr.model=="SIMPLE_PINHOLE":
@@ -989,7 +989,7 @@ def readIphoneDataCamera(uid, camera, image_path, time):
     mask=None
     mask_val_path=os.path.join(os.path.dirname(image_path.replace("rgb","covisible").replace("1x","2x")),"val",image_name+".png")
     if os.path.exists(mask_val_path):
-        mask= np.asarray(imageio.imread(mask_val_path)/255.)### 只会读取验证集，covisible的mask
+        mask= np.asarray(imageio.imread(mask_val_path)/255.)###        ，covisible mask
     cam= CameraInfo(uid=uid, R=R, T=T, FovY=FovY, FovX=FovX, image=image,
                       image_path=image_path, image_name=image_name, width=width, height=height,mask=mask, time=time,coord_scale=camera.coord_scale)    
     # cam.coord_scale = camera.coord_scale
@@ -1030,13 +1030,13 @@ def readIphoneDataSceneInfo(path, eval,random_init_pcd=False,re_scale_json=None)
     print('i_train',i_train)
     print('i_test',i_test)
     all_cams = [meta_json[i]['camera_id'] for i in all_imgs]
-    all_times = [meta_json[i]['appearance_id'] for i in all_imgs] ## TODO: 这里的time是appearance_id
+    all_times = [meta_json[i]['appearance_id'] for i in all_imgs] ## TODO:    time appearance_id
     time_scalefactor= 1.0
-    max_time = max(all_times)/time_scalefactor ##为了把时间缩小到time_scalefactor倍
+    max_time = max(all_times)/time_scalefactor ##        time_scalefactor 
     all_times = [meta_json[i]['appearance_id']/max_time for i in all_imgs]
     selected_time = set(all_times)
     ratio = 0.5
-    ## FIXME LQM_DEBUG_SCALE_FACTOR 这个参数是为了验证diff-rasterization的bug而做的。
+    ## FIXME LQM_DEBUG_SCALE_FACTOR          diff-rasterization bug   。
     LQM_DEBUG_SCALE_FACTOR=1
     all_cam_params = []
     for im in all_imgs:
@@ -1049,7 +1049,7 @@ def readIphoneDataSceneInfo(path, eval,random_init_pcd=False,re_scale_json=None)
             mean_xyz = np.array(re_scale_json["mean_xyz"])
             scale_xyz = np.array(re_scale_json["scale"])
             camera.position = (camera.position - mean_xyz)*scale_xyz
-            camera.coord_scale = coord_scale*scale_xyz ## 后面在load cam的时候还会用到。所以需要在这里改。
+            camera.coord_scale = coord_scale*scale_xyz ##    load cam       。        。
         
         all_cam_params.append(camera)
 
@@ -1152,7 +1152,7 @@ def readRaftExhaustiveDataCamera(uid, camera, image_path, time):
     mask=None
     mask_val_path=os.path.join(os.path.dirname(image_path.replace("rgb","covisible").replace("1x","2x")),"val",image_name+".png")
     if os.path.exists(mask_val_path):
-        mask= np.asarray(imageio.imread(mask_val_path)/255.)### 只会读取验证集，covisible的mask
+        mask= np.asarray(imageio.imread(mask_val_path)/255.)###        ，covisible mask
     basedir ="/".join(image_path.split("/")[:-3])
     exhaustive_raft_dirs = sorted(glob.glob(os.path.join(basedir,"raft_exhaustive",image_name+".png"+"*.npy")))
     exhaustive_raft_mask_dirs = sorted(glob.glob(os.path.join(basedir,"raft_masks",image_name+".png"+"*.png")))
@@ -1208,13 +1208,13 @@ def readRaftExhaustiveDataSceneInfo(path, eval,random_init_pcd=False,re_scale_js
     print('i_train',i_train)
     print('i_test',i_test)
     all_cams = [meta_json[i]['camera_id'] for i in all_imgs]
-    all_times = [meta_json[i]['appearance_id'] for i in all_imgs] ## TODO: 这里的time是appearance_id
+    all_times = [meta_json[i]['appearance_id'] for i in all_imgs] ## TODO:    time appearance_id
     time_scalefactor= 1.0
-    max_time = max(all_times)/time_scalefactor ##为了把时间缩小到time_scalefactor倍
+    max_time = max(all_times)/time_scalefactor ##        time_scalefactor 
     all_times = [meta_json[i]['appearance_id']/max_time for i in all_imgs]
     selected_time = set(all_times)
     ratio = 0.5
-    ## FIXME LQM_DEBUG_SCALE_FACTOR 这个参数是为了验证diff-rasterization的bug而做的。
+    ## FIXME LQM_DEBUG_SCALE_FACTOR          diff-rasterization bug   。
     LQM_DEBUG_SCALE_FACTOR=1
     all_cam_params = []
     for im in all_imgs:
@@ -1227,7 +1227,7 @@ def readRaftExhaustiveDataSceneInfo(path, eval,random_init_pcd=False,re_scale_js
             mean_xyz = np.array(re_scale_json["mean_xyz"])
             scale_xyz = np.array(re_scale_json["scale"])
             camera.position = (camera.position - mean_xyz)*scale_xyz
-            camera.coord_scale = coord_scale*scale_xyz ## 后面在load cam的时候还会用到。所以需要在这里改。
+            camera.coord_scale = coord_scale*scale_xyz ##    load cam       。        。
         
         all_cam_params.append(camera)
 
@@ -1452,7 +1452,7 @@ def readSelfMadeSceneInfo(path, images=None, eval=False,re_scale_json=None,exhau
 
     use_depthNonEdgeMsk=True
     # use_depthNonEdgeMsk=False
-    # 打印当前时间，使用红色字体
+    #       ，      
     # print(f"{red_color}+++++: setting use depth mask ==False")
     print(f"{red_color}+++++: setting use depth mask =={use_depthNonEdgeMsk},{reset_color}")
     import json 
@@ -1471,15 +1471,15 @@ def readSelfMadeSceneInfo(path, images=None, eval=False,re_scale_json=None,exhau
         rescale_scene_json=json.load(open(os.path.join(path, "__re_scale_scene.json")))
     # cam_idxs= list(range(start,end))
     if "DyNeRF" in path:
-        focal = 1462.12543404163334/2 ## 给定2x的尺度。
+        focal = 1462.12543404163334/2 ##   2x   。
         print("DyNeRF Focal: 1462.12543404163334/2")
-    else: ## 其他场景假定focal 都是800# #FIXME: 实际上Nvidia的focal是变幻的
+    else: ##       focal   800# #FIXME:    Nvidia focal    
         focal = 800
     identical_pose=np.eye(4)
     # cam_intrinsic=np.array( [ 1.0923847397901995e+03, 0., 5.3667369287475469e+02, 0.,
     #    1.0970820622714029e+03, 4.9056644177497316e+02, 0., 0., 1. ]).reshape(3,3)
     reading_dir = "rgb/2x" if images == None else images
-    scale_ratio = float(2/int(images[-2].strip("/"))) if images is not None else 1  ## 如果这里是None，那么就是1，如果是4x，那么就是1/2
+    scale_ratio = float(2/int(images[-2].strip("/"))) if images is not None else 1  ##      None，    1，   4x，    1/2
     focal = focal*scale_ratio
     print("scaled focal ",focal)
     images_folder=os.path.join(path, reading_dir)
@@ -1734,7 +1734,7 @@ def read_DyNeRF_cam_info(path,):
     # test_cam_id = [1,2,3,4,5,6,7,8,9,10,11,12,13,15,16,]## FIXME for teasr make/
     test_cam_id = [5,6,]## FIXME for teasr make
     
-    print("Reading Training Camera")### 这里需要反过来。
+    print("Reading Training Camera")###        。
     train_cam_infos = readCamerasFromNpy(path, 'poses_bounds.npy', split="test", hold_id=hold_id,
                                             num_images=1)
 

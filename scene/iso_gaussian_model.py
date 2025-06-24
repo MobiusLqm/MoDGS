@@ -380,10 +380,10 @@ class IsotropicGaussianModel:
         n_init_points = self.get_xyz.shape[0]
         # Extract points that satisfy the gradient condition
         padded_grad = torch.zeros((n_init_points), device="cuda")
-        padded_grad[:grads.shape[0]] = grads.squeeze()### 因为前面是clone。所以这一步，只去前面的点，不取后面没有被克隆的点。
+        padded_grad[:grads.shape[0]] = grads.squeeze()###      clone。     ，      ，           。
         selected_pts_mask = torch.where(padded_grad >= grad_threshold, True, False)
         selected_pts_mask = torch.logical_and(selected_pts_mask,
-                                              torch.max(self.get_scaling, dim=1).values > self.percent_dense*scene_extent) ## 大于一定的scale
+                                              torch.max(self.get_scaling, dim=1).values > self.percent_dense*scene_extent) ##      scale
 
         # print(grads.shape)
         # print(selected_pts_mask.shape)
@@ -407,9 +407,9 @@ class IsotropicGaussianModel:
 
     def densify_and_clone(self, grads, grad_threshold, scene_extent):
         # Extract points that satisfy the gradient condition
-        selected_pts_mask = torch.where(torch.norm(grads, dim=-1) >= grad_threshold, True, False) ## 梯度大于阈值。
+        selected_pts_mask = torch.where(torch.norm(grads, dim=-1) >= grad_threshold, True, False) ##       。
         selected_pts_mask = torch.logical_and(selected_pts_mask,
-                                              torch.max(self.get_scaling, dim=1).values <= self.percent_dense*scene_extent)## scale小于一定尺度。 ## 这里的dim1是什么？
+                                              torch.max(self.get_scaling, dim=1).values <= self.percent_dense*scene_extent)## scale      。 ##    dim1   ？
         
         new_xyz = self._xyz[selected_pts_mask]
         new_features_dc = self._features_dc[selected_pts_mask]
@@ -427,10 +427,10 @@ class IsotropicGaussianModel:
         self.densify_and_clone(grads, max_grad, extent)
         self.densify_and_split(grads, max_grad, extent)
 
-        prune_mask = (self.get_opacity < min_opacity).squeeze() ## opacity 过小
+        prune_mask = (self.get_opacity < min_opacity).squeeze() ## opacity   
         if max_screen_size:
-            big_points_vs = self.max_radii2D > max_screen_size ## 屏幕空间的点过大。
-            big_points_ws = self.get_scaling.max(dim=1).values > 0.1 * extent ## 世界坐标系下面过大
+            big_points_vs = self.max_radii2D > max_screen_size ##         。
+            big_points_ws = self.get_scaling.max(dim=1).values > 0.1 * extent ##          
             prune_mask = torch.logical_or(torch.logical_or(prune_mask, big_points_vs), big_points_ws)
         self.prune_points(prune_mask)
 
@@ -820,10 +820,10 @@ class SeperateRepreGaussianModel:
         n_init_points = self.get_xyz.shape[0]
         # Extract points that satisfy the gradient condition
         padded_grad = torch.zeros((n_init_points), device="cuda")
-        padded_grad[:grads.shape[0]] = grads.squeeze()### 因为前面是clone。所以这一步，只去前面的点，不取后面没有被克隆的点。
+        padded_grad[:grads.shape[0]] = grads.squeeze()###      clone。     ，      ，           。
         selected_pts_mask = torch.where(padded_grad >= grad_threshold, True, False)
         selected_pts_mask = torch.logical_and(selected_pts_mask,
-                                              torch.max(self.get_scaling, dim=1).values > self.percent_dense*scene_extent) ## 大于一定的scale
+                                              torch.max(self.get_scaling, dim=1).values > self.percent_dense*scene_extent) ##      scale
 
         # print(grads.shape)
         # print(selected_pts_mask.shape)
@@ -848,9 +848,9 @@ class SeperateRepreGaussianModel:
 
     def densify_and_clone(self, grads, grad_threshold, scene_extent):
         # Extract points that satisfy the gradient condition
-        selected_pts_mask = torch.where(torch.norm(grads, dim=-1) >= grad_threshold, True, False) ## 梯度大于阈值。
+        selected_pts_mask = torch.where(torch.norm(grads, dim=-1) >= grad_threshold, True, False) ##       。
         selected_pts_mask = torch.logical_and(selected_pts_mask,
-                                              torch.max(self.get_scaling, dim=1).values <= self.percent_dense*scene_extent)## scale小于一定尺度。 ## 这里的dim1是什么？
+                                              torch.max(self.get_scaling, dim=1).values <= self.percent_dense*scene_extent)## scale      。 ##    dim1   ？
         
         new_xyz = self._xyz[selected_pts_mask]
         new_xyz_coefficient = self._xyz_coefficient[selected_pts_mask]
@@ -869,10 +869,10 @@ class SeperateRepreGaussianModel:
         self.densify_and_clone(grads, max_grad, extent)
         self.densify_and_split(grads, max_grad, extent)
 
-        prune_mask = (self.get_opacity < min_opacity).squeeze() ## opacity 过小
+        prune_mask = (self.get_opacity < min_opacity).squeeze() ## opacity   
         if max_screen_size:
-            big_points_vs = self.max_radii2D > max_screen_size ## 屏幕空间的点过大。
-            big_points_ws = self.get_scaling.max(dim=1).values > 0.1 * extent ## 世界坐标系下面过大
+            big_points_vs = self.max_radii2D > max_screen_size ##         。
+            big_points_ws = self.get_scaling.max(dim=1).values > 0.1 * extent ##          
             prune_mask = torch.logical_or(torch.logical_or(prune_mask, big_points_vs), big_points_ws)
         self.prune_points(prune_mask)
 
@@ -887,7 +887,7 @@ class SeperateRepreGaussianModel:
 class SeperateRepreIsotropicGaussianModel:
     """different representation for xyz and xyz_coefficient, and different learning rate for them
         above this, We use isotropic gaussian model, which fix Rotation and Scaling.
-    2024年1月10日14:03:23: 加入 global transform model和 local transfrom model。
+    2024 1 10 14:03:23:    global transform model  local transfrom model。
     """
     def setup_functions(self):
         def build_covariance_from_scaling_rotation(scaling, scaling_modifier, rotation):
@@ -1028,7 +1028,7 @@ class SeperateRepreIsotropicGaussianModel:
         time_length = self._xyz.shape[1]
         # self._xyz = nn.Parameter(model_args[1].repeat(1, time_length, 1).requires_grad_(True))
         # self._rotation = nn.Parameter(model_args[5].repeat(1, time_length, 1).requires_grad_(True))
-        self._scaling=_scaling[:,:1] ## TODO: 这里的scaling是不是明明是一个值，但是我还是存了三个。
+        self._scaling=_scaling[:,:1] ## TODO:    scaling         ，         。
         self.training_setup(training_args)
         self.xyz_gradient_accum = xyz_gradient_accum
         self.denom = denom
@@ -1387,20 +1387,20 @@ class SeperateRepreIsotropicGaussianModel:
         n_init_points = self.get_xyz.shape[0]
         # Extract points that satisfy the gradient condition
         padded_grad = torch.zeros((n_init_points), device="cuda")
-        padded_grad[:grads.shape[0]] = grads.squeeze()### 因为前面是clone。所以这一步，只去前面的点，不取后面没有被克隆的点。
+        padded_grad[:grads.shape[0]] = grads.squeeze()###      clone。     ，      ，           。
         selected_pts_mask = torch.where(padded_grad >= grad_threshold, True, False)
         selected_pts_mask = torch.logical_and(selected_pts_mask,
-                                              torch.max(self.get_scaling, dim=1).values > self.percent_dense*scene_extent) ## 大于一定的scale
+                                              torch.max(self.get_scaling, dim=1).values > self.percent_dense*scene_extent) ##      scale
 
         # print(grads.shape)
         # print(selected_pts_mask.shape)
-        stds = self.get_scaling[selected_pts_mask].repeat(N*self.get_xyz.shape[1],1) ## TODO：这里的代码有问题是吧？后面的coefficient也参与了计算？
+        stds = self.get_scaling[selected_pts_mask].repeat(N*self.get_xyz.shape[1],1) ## TODO：          ？   coefficient      ？
         means = torch.zeros((stds.size(0), 3),device="cuda")    
         samples = torch.normal(mean=means, std=stds)
         rots = build_rotation(self.get_rotation_noact[selected_pts_mask]).repeat(N,1,1,1).reshape(-1, 3, 3)
 
         new_xyz = torch.bmm(rots, samples.unsqueeze(-1)).squeeze(-1).unsqueeze(1).reshape(-1, self.get_xyz.shape[1], 3) + self.get_xyz[selected_pts_mask].repeat(N, 1, 1) 
-        new_xyz=new_xyz[:, :1, :] ##TODO： 我这里似乎没有对new_coefficient采样。而是直接copy的以前的轨迹。
+        new_xyz=new_xyz[:, :1, :] ##TODO：         new_coefficient  。    copy      。
         new_xyz_coefficient= self.get_xyz[selected_pts_mask].repeat(N, 1, 1)[:, 1:, :]
         new_scaling = self.scaling_inverse_activation(self.get_scaling[selected_pts_mask].repeat(N,1) / (0.8*N))[:,:1] ## asuming they are the same
         new_rotation_coefficient = self._rotation_coefficient[selected_pts_mask].repeat(N,1,1)
@@ -1415,9 +1415,9 @@ class SeperateRepreIsotropicGaussianModel:
 
     def densify_and_clone(self, grads, grad_threshold, scene_extent):
         # Extract points that satisfy the gradient condition
-        selected_pts_mask = torch.where(torch.norm(grads, dim=-1) >= grad_threshold, True, False) ## 梯度大于阈值。
+        selected_pts_mask = torch.where(torch.norm(grads, dim=-1) >= grad_threshold, True, False) ##       。
         selected_pts_mask = torch.logical_and(selected_pts_mask,
-                                              torch.max(self.get_scaling, dim=1).values <= self.percent_dense*scene_extent)## scale小于一定尺度。 ## 这里的dim1是什么？
+                                              torch.max(self.get_scaling, dim=1).values <= self.percent_dense*scene_extent)## scale      。 ##    dim1   ？
         
         new_xyz = self._xyz[selected_pts_mask]
         new_xyz_coefficient = self._xyz_coefficient[selected_pts_mask]
@@ -1436,19 +1436,19 @@ class SeperateRepreIsotropicGaussianModel:
         self.densify_and_clone(grads, max_grad, extent)
         self.densify_and_split(grads, max_grad, extent)
 
-        prune_mask = (self.get_opacity < min_opacity).squeeze() ## opacity 过小
+        prune_mask = (self.get_opacity < min_opacity).squeeze() ## opacity   
         if max_screen_size:
-            big_points_vs = self.max_radii2D > max_screen_size ## 屏幕空间的点过大。
-            big_points_ws = self.get_scaling.max(dim=1).values > 0.1 * extent ## 世界坐标系下面过大
+            big_points_vs = self.max_radii2D > max_screen_size ##         。
+            big_points_ws = self.get_scaling.max(dim=1).values > 0.1 * extent ##          
             prune_mask = torch.logical_or(torch.logical_or(prune_mask, big_points_vs), big_points_ws)
         self.prune_points(prune_mask)
 
         torch.cuda.empty_cache()
     def prune(self,min_opacity, extent, max_screen_size):
-        prune_mask = (self.get_opacity < min_opacity).squeeze() ## opacity 过小
+        prune_mask = (self.get_opacity < min_opacity).squeeze() ## opacity   
         if max_screen_size:
-            big_points_vs = self.max_radii2D > max_screen_size ## 屏幕空间的点过大。
-            big_points_ws = self.get_scaling.max(dim=1).values > 0.1 * extent ## 世界坐标系下面过大
+            big_points_vs = self.max_radii2D > max_screen_size ##         。
+            big_points_ws = self.get_scaling.max(dim=1).values > 0.1 * extent ##          
             prune_mask = torch.logical_or(torch.logical_or(prune_mask, big_points_vs), big_points_ws)
         self.prune_points(prune_mask)
 

@@ -287,7 +287,7 @@ def render_depth_normal(viewpoint_camera, pc : GaussianModel,
 
     
 ############################################################################################
-################# Code below are old  before 2024年3月1日21:54:13，Basis Gaussian的模型。#####
+################# Code below are old  before 2024 3 1 21:54:13，Basis Gaussian   。#####
 ############################################################################################
 def render_video(scene,gaussians,pipe,background):
     # print("Rendering video...")

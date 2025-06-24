@@ -82,7 +82,7 @@ def project_from_rgbpcd(w2c,intrinsic,rgbpcd,img_shape):
 def reprojection2another_cam(uv,depth,cam1_c2w,cam2_c2w,intrinsic):
     """cam1_c2w:4by4 matrix:  cam1_c2w@P_c =P_w
     
-    ## uv: 先x方向后y方向
+    ## uv:  x   y  
     """
     
     ###Unprojecting uv at cam1 to world xyz
@@ -168,7 +168,7 @@ def project_from_rgbpcd_torch(w2c,intrinsic,rgbpcd,img_shape):
     return pcd_img,new_depth,new_img
 def unproject_from_depthmap_torch(c2w,intrinsic,depth:torch.tensor,depth_mask=None):
     """depth: (h,w)"""
-    """这个函数不对depth 为0的区域做mask，"""
+    """      depth  0    mask，"""
     (h,w)=depth.shape
     px, py = torch.meshgrid(
         

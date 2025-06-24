@@ -132,7 +132,7 @@ def validate_table_completion(model,dataset,iteration,writer):
 
 
 def train_table_completion_NIT(args):
-    """base on discussion with LIU YUAN 2024年3月24日20
+    """base on discussion with LIU YUAN 2024 3 24 20
 
     Args:
         args (_type_): _description_
@@ -471,7 +471,7 @@ def  renderview_stage1and2(args,dataset_args:PointTrackModelParams,opt:PointTrac
     
     args.outdir = os.path.dirname(checkpoint)
     outdir= args.outdir
-    dataset_args.Factor_ColmapDepthAlign =args.Factor_ColmapDepthAlign  ## 2024年5月12日完与LIU YUAN讨论之后的结果。
+    dataset_args.Factor_ColmapDepthAlign =args.Factor_ColmapDepthAlign  ## 2024 5 12   LIU YUAN       。
     ######
     ###### 
     # net_args.timestamp=args.timestamp
@@ -676,7 +676,7 @@ def test_stage1and2_Metric(args,dataset_args:PointTrackModelParams,opt:PointTrac
     
     args.outdir = os.path.dirname(checkpoint)
     outdir= args.outdir
-    dataset_args.Factor_ColmapDepthAlign =args.Factor_ColmapDepthAlign  ## 2024年5月12日完与LIU YUAN讨论之后的结果。
+    dataset_args.Factor_ColmapDepthAlign =args.Factor_ColmapDepthAlign  ## 2024 5 12   LIU YUAN       。
     ######
     ###### 
     # net_args.timestamp=args.timestamp
@@ -786,7 +786,7 @@ def test_stage1and2_Metric(args,dataset_args:PointTrackModelParams,opt:PointTrac
                 render_depth,render_alpha = render_pkg["depth"],render_pkg["alpha"]
                 
                 print(render_depth.max()," =====",render_depth.min())
-                depth = torch.clamp(minmax_norm(render_depth,torch.quantile(render_depth,0.01),1.2*torch.quantile(render_depth,0.98)),0,1) ###TODO: 为了ablation visualization
+                depth = torch.clamp(minmax_norm(render_depth,torch.quantile(render_depth,0.01),1.2*torch.quantile(render_depth,0.98)),0,1) ###TODO:   ablation visualization
                 
                 image_name = cam.image_name
                 img_list.append(tob8(torch.clamp(image.permute(1,2,0),0,1).cpu().numpy()))

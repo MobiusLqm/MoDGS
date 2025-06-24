@@ -58,7 +58,7 @@ class TimePCDTable(BaseCorrespondenceDataset):
         datadir = cfg.TimePcd_dir
         self.device = torch.device(device)
         time_pcd = torch.from_numpy(np.load(datadir)).to(self.device)[:,:,:]
-        self.max_points = max_points### get——item时候返回的最大点云数量。
+        self.max_points = max_points### get——item           。
         if keeprgb:
             print("Keep RGB channel")
             self.time_pcd = time_pcd[:,:,:3]
@@ -91,7 +91,7 @@ class TimePCDTable(BaseCorrespondenceDataset):
                 # mean_xyz = self.time_pcd[:,0,:][~torch.isnan(self.time_pcd[:,0,:]).any(-1)].mean(0)
                 mean_xyz = (min_xyz+max_xyz)/2
                 bbox = max_xyz-min_xyz
-                scale = 2.0/bbox.max() ## TODO: 这里是保持三个方向的scale一致？还是每个方向的scale不一样（这样会有一些畸变。） ## rescale 到 【-1,1】
+                scale = 2.0/bbox.max() ## TODO:           scale  ？       scale   （        。） ## rescale   【-1,1】
                 # array= torch.tensor([min_xyz,max_xyz,mean_xyz,scale])
                 dict_rescale = {"min_xyz":min_xyz.cpu().numpy().astype(np.float64).tolist(),
                                 "max_xyz":max_xyz.cpu().numpy().astype(np.float64).tolist(),
@@ -183,7 +183,7 @@ class TimePCDTable(BaseCorrespondenceDataset):
                     
                     
                 if  frame_i>0:
-                    ## 构建 bwd flow
+                    ##    bwd flow
                     pcd_i_bwd= self.time_pcd[nonan_msk,frame_i-1,:]
                     if reserve_for_validate_rate>0:
                         pcd_i_bwd_val = pcd_i_bwd[val_mask]
@@ -209,7 +209,7 @@ class TimePCDTable(BaseCorrespondenceDataset):
                     
                     fwd_nonan_msk = torch.logical_not(torch.isnan(pcd_i_fwd).any(1))
                     fwd_pair  ={"fwd_valid_gt":pcd_i_fwd,"fwd_mask":fwd_nonan_msk}
-                    ## 构建fwd flow
+                    ##   fwd flow
                 # training_pairs[frame_i] = {"valid_xyz":pcd_i,"bwd_gt":bwd_pair,"fwd_gt":fwd_pair}
                 training_pairs[frame_i] = {"valid_xyz":pcd_i,"time":torch.Tensor([frame_i/T]),"time_interval":torch.Tensor([1/T]),"index":frame_i}
                 if fwd_pair is not None:
@@ -242,7 +242,7 @@ class TimePCDTable(BaseCorrespondenceDataset):
         return self.time_pcd
      
     def filter_firstN(self,firstN):
-        "只留下前面N帧的训练集"
+        "     N     "
         if firstN<=0:
             print("firstN smaller than 0, will not filter the dataset")
             return
@@ -307,7 +307,7 @@ class NeighbourFlowPairsDataset(BaseCorrespondenceDataset):
         
         with open(datadir, 'rb') as f:
             time_pcd = pickle.load(f)
-        self.max_points = max_points### get——item时候返回的最大点云数量。
+        self.max_points = max_points### get——item           。
         self.PCD_INTERVAL=cfg.pcd_interval
 
         print("PCD_Interval:",self.PCD_INTERVAL)
@@ -355,7 +355,7 @@ class NeighbourFlowPairsDataset(BaseCorrespondenceDataset):
 
                 mean_xyz = (min_xyz+max_xyz)/2
                 bbox = max_xyz-min_xyz
-                scale = 2.0/bbox.max() ## TODO: 这里是保持三个方向的scale一致？还是每个方向的scale不一样（这样会有一些畸变。） ## rescale 到 【-1,1】
+                scale = 2.0/bbox.max() ## TODO:           scale  ？       scale   （        。） ## rescale   【-1,1】
                 # array= torch.tensor([min_xyz,max_xyz,mean_xyz,scale])
                 dict_rescale = {"min_xyz":min_xyz.cpu().numpy().astype(np.float64).tolist(),
                                 "max_xyz":max_xyz.cpu().numpy().astype(np.float64).tolist(),
@@ -445,7 +445,7 @@ class NeighbourFlowPairsDataset(BaseCorrespondenceDataset):
                 
                 
             if "pcd_pre" in data_pair:
-                ## 构建 bwd flow
+                ##    bwd flow
                 pcd_i_bwd=  data_pair["pcd_pre"][:,:3]
                 pcd_i_bwd_msk = data_pair["pcd_pre_msk"]
                 if reserve_for_validate_rate>0:
@@ -469,7 +469,7 @@ class NeighbourFlowPairsDataset(BaseCorrespondenceDataset):
                     # fwd_pair_val  = {"fwd_valid_gt":pcd_i_fwd_val[fwd_nonan_msk_val],"fwd_mask":fwd_nonan_msk_val}     
                     fwd_pair_val  = {"fwd_valid_gt":pcd_i_fwd_val,"fwd_mask":pcd_i_fwd_msk_val}     
                 fwd_pair  ={"fwd_valid_gt":pcd_i_fwd,"fwd_mask":pcd_i_fwd_msk}
-                ## 构建fwd flow
+                ##   fwd flow
             # training_pairs[frame_i] = {"valid_xyz":pcd_i,"bwd_gt":bwd_pair,"fwd_gt":fwd_pair}
             training_pairs[frame_i] = {"valid_xyz":pcd_i,"time":torch.Tensor([frame_i/T]),"time_interval":torch.Tensor([1/T]),"index":frame_i}
             if fwd_pair is not None:
@@ -494,7 +494,7 @@ class NeighbourFlowPairsDataset(BaseCorrespondenceDataset):
         return self.re_scale_json
      
     def filter_firstN(self,firstN):
-        "只留下前面N帧的训练集"
+        "     N     "
         if firstN<=0:
             print("firstN smaller than 0, will not filter the dataset")
             return
@@ -577,14 +577,14 @@ class ExhaustiveFlowPairsDataset(BaseCorrespondenceDataset):
         if os.path.exists(os.path.join(os.path.dirname(datadir), 'rgb_interlval1')):
             import glob 
             path = os.path.dirname(datadir)
-            self.max_time =  len(glob.glob(os.path.join(path, "rgb_interlval1", "*.png")))-1 ## 从0开始编号所以-1
+            self.max_time =  len(glob.glob(os.path.join(path, "rgb_interlval1", "*.png")))-1 ##  0      -1
             print("Max time:",self.max_time)
         with open(datadir, 'rb') as f:
             time_pcd = pickle.load(f)
-        self.max_points = max_points### get——item时候返回的最大点云数量。
+        self.max_points = max_points### get——item           。
 
-        self.PCD_INTERVAL=cfg.pcd_interval ## Training 点云的间隔
-        self.max_interval = cfg.init_interval # 在query Exhaustive training pair时，最大的时间间隔是多少。
+        self.PCD_INTERVAL=cfg.pcd_interval ## Training      
+        self.max_interval = cfg.init_interval #  query Exhaustive training pair ，          。
         self.init_interval = cfg.init_interval
         print("PCD_Interval:",self.PCD_INTERVAL)
         if keeprgb:
@@ -633,7 +633,7 @@ class ExhaustiveFlowPairsDataset(BaseCorrespondenceDataset):
 
                 mean_xyz = (min_xyz+max_xyz)/2
                 bbox = max_xyz-min_xyz
-                scale = 2.0/bbox.max() ## TODO: 这里是保持三个方向的scale一致？还是每个方向的scale不一样（这样会有一些畸变。） ## rescale 到 【-1,1】
+                scale = 2.0/bbox.max() ## TODO:           scale  ？       scale   （        。） ## rescale   【-1,1】
                 # array= torch.tensor([min_xyz,max_xyz,mean_xyz,scale])
                 dict_rescale = {"min_xyz":min_xyz.cpu().numpy().astype(np.float64).tolist(),
                                 "max_xyz":max_xyz.cpu().numpy().astype(np.float64).tolist(),
@@ -753,8 +753,8 @@ class ExhaustiveFlowPairsDataset(BaseCorrespondenceDataset):
                 training_pairs[frame_i]["target_dicts"][dict_key]["pcd_target_msk"] \
                         = self.time_pcd[frame_i]["target_dicts"][dict_key]["pcd_target_msk"]
                 if reserve_for_validate_rate>0:
-                    ### 构建 validation  frame                
-                    pcd_target_val = self.time_pcd[frame_i]["target_dicts"][dict_key]["pcd"][val_mask][:,:3] ## 明确留下xyz，避免后面 validation的时候出错。
+                    ###    validation  frame                
+                    pcd_target_val = self.time_pcd[frame_i]["target_dicts"][dict_key]["pcd"][val_mask][:,:3] ##     xyz，     validation     。
                     valid_mask_target_val =  self.time_pcd[frame_i]["target_dicts"][dict_key]["pcd_target_msk"][val_mask]
                     
                     target_dict = {"frame_id":target_frame_id,
@@ -763,9 +763,9 @@ class ExhaustiveFlowPairsDataset(BaseCorrespondenceDataset):
                                    "pcd_target_msk":valid_mask_target_val}
                     current_frame_val["target_dicts"][dict_key]=target_dict
 
-                    ### 更新 Training frame
+                    ###    Training frame
                     training_pairs[frame_i]["target_dicts"][dict_key]["pcd"] \
-                        = self.time_pcd[frame_i]["target_dicts"][dict_key]["pcd"][torch.logical_not(val_mask)][:,:3] ## 明确留下xyz，避免后面 validation的时候出错。
+                        = self.time_pcd[frame_i]["target_dicts"][dict_key]["pcd"][torch.logical_not(val_mask)][:,:3] ##     xyz，     validation     。
                     training_pairs[frame_i]["target_dicts"][dict_key]["pcd_target_msk"] \
                         = self.time_pcd[frame_i]["target_dicts"][dict_key]["pcd_target_msk"][torch.logical_not(val_mask)]
             # training_pairs[frame_i] = self.time_pcd[frame_i]
@@ -791,7 +791,7 @@ class ExhaustiveFlowPairsDataset(BaseCorrespondenceDataset):
         return self.re_scale_json
      
     def filter_firstN(self,firstN):
-        "只留下前面N帧的训练集"
+        "     N     "
         if firstN<=0:
             print("firstN smaller than 0, will not filter the dataset")
             return

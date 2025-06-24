@@ -22,7 +22,7 @@ def get_canonical_space_PCD(table,mask,N_se,net_query_fn_cano,mode="average"):
     N: batch size
     T: time steps
     """
-    if mode == "average": ### 对于table中的没一个点都将他warp到canonical space，然后取平均值（xyz， color）
+    if mode == "average": ###   table         warp canonical space，      （xyz， color）
         T= table.shape[1]
         empty_table = torch.zeros([table.shape[0],6],dtype=table.dtype,device=table.device)
         assert table.shape[2]==6,"No rgb color error"
@@ -143,7 +143,7 @@ def get_gaussians_init_pcd(dataset:BaseCorrespondenceDataset,trainer:Neural_Inve
             canonical_list = []
             for index , item in tqdm(enumerate(pcd_pairs)):
                 pcd_t =  item["pcd"]
-                assert int(item["frame_id"])/dataset.PCD_INTERVAL==index,"error"  ### 在Exhaustive paring的时候 frame_id 存储的是 image_id 比如 "000000", "000001", "000002"...
+                assert int(item["frame_id"])/dataset.PCD_INTERVAL==index,"error"  ###  Exhaustive paring    frame_id      image_id    "000000", "000001", "000002"...
                 time_t = int(item["frame_id"])/dataset.PCD_INTERVAL/float(T)
                 time_t = torch.Tensor([time_t])
                 xyz_cano ,_= network_query_fn_2canno(pcd_t[:,:3].cuda(),time_t.cuda())
@@ -244,7 +244,7 @@ def table_completion(table,mask,N_se,net_query_fn):
             assert (left_margin_coords[:,1]-1>=0).all(),"error in left margin"
             assert  ~ (~torch.isnan(table[left_margin_coords[:,0],left_margin_coords[:,1]-1,:3])).all(),"error in left margin value"
             table[left_margin_coords[:,0],left_margin_coords[:,1]-1,:3] = predicted_xyz_left
-            table[left_margin_coords[:,0],left_margin_coords[:,1]-1,3:] = table[left_margin_coords[:,0],left_margin_coords[:,1],3:] ## copy其他值
+            table[left_margin_coords[:,0],left_margin_coords[:,1]-1,3:] = table[left_margin_coords[:,0],left_margin_coords[:,1],3:] ## copy   
             ## update N_se
             N_se[left_margin_mask,1] = N_se[left_margin_mask,1]-1
             
@@ -262,11 +262,11 @@ def table_completion(table,mask,N_se,net_query_fn):
                 flow= flow.squeeze(0)
             fwd_flow= flow[:,3:].to(right_margin_xyz.device)
             predicted_xyz_right= fwd_flow+ right_margin_xyz
-            ### fill table 下一个坐标
+            ### fill table      
             assert (right_margin_coords[:,2]+1<T).all(),"error in right margin"
             assert ~((~torch.isnan(table[right_margin_coords[:,0],right_margin_coords[:,2]+1,3:])).all()),"error in right margin value"
             table[right_margin_coords[:,0],right_margin_coords[:,2]+1,:3] = predicted_xyz_right
-            table[right_margin_coords[:,0],right_margin_coords[:,2]+1,3:] = table[right_margin_coords[:,0],right_margin_coords[:,2],3:] ## copy其他值
+            table[right_margin_coords[:,0],right_margin_coords[:,2]+1,3:] = table[right_margin_coords[:,0],right_margin_coords[:,2],3:] ## copy   
             ## update N-se
             N_se[right_margin_mask,2] = N_se[right_margin_mask,2]+1
         ## extend right side end
@@ -305,7 +305,7 @@ def table_completion_NIT(table,mask,N_se,net_query_fn_2Canno,net_query_fn_2timet
             assert (left_margin_coords[:,1]-1>=0).all(),"error in left margin"
             assert  ~ (~torch.isnan(table[left_margin_coords[:,0],left_margin_coords[:,1]-1,:3])).all(),"error in left margin value"
             table[left_margin_coords[:,0],left_margin_coords[:,1]-1,:3] = predicted_xyz_left
-            table[left_margin_coords[:,0],left_margin_coords[:,1]-1,3:] = table[left_margin_coords[:,0],left_margin_coords[:,1],3:] ## copy其他值
+            table[left_margin_coords[:,0],left_margin_coords[:,1]-1,3:] = table[left_margin_coords[:,0],left_margin_coords[:,1],3:] ## copy   
             ## update N_se
             N_se[left_margin_mask,1] = N_se[left_margin_mask,1]-1
             
@@ -325,11 +325,11 @@ def table_completion_NIT(table,mask,N_se,net_query_fn_2Canno,net_query_fn_2timet
             if xyz_right.dim()==3:
                 xyz_right= xyz_right.squeeze(0)
             predicted_xyz_right= xyz_right.to(left_margin_xyz.device)
-            ### fill table 下一个坐标
+            ### fill table      
             assert (right_margin_coords[:,2]+1<T).all(),"error in right margin"
             assert ~((~torch.isnan(table[right_margin_coords[:,0],right_margin_coords[:,2]+1,3:])).all()),"error in right margin value"
             table[right_margin_coords[:,0],right_margin_coords[:,2]+1,:3] = predicted_xyz_right
-            table[right_margin_coords[:,0],right_margin_coords[:,2]+1,3:] = table[right_margin_coords[:,0],right_margin_coords[:,2],3:] ## copy其他值
+            table[right_margin_coords[:,0],right_margin_coords[:,2]+1,3:] = table[right_margin_coords[:,0],right_margin_coords[:,2],3:] ## copy   
             ## update N-se
             N_se[right_margin_mask,2] = N_se[right_margin_mask,2]+1
         ## extend right side end

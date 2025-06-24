@@ -282,7 +282,7 @@ def obtain_static_msk(base_dir):
 
 def align_all_frames(depth_dirs:list, st_predicted,new_scale_alignFrame0:dict,static_msk):
     # depth_dirs = glob(os.path.join(base_dir,'GeoWizardOut/depth_npy/*.npy'))
-    reference_depthdir = depth_dirs[5] ## 5 is the reference frame 这个必须要和 align scale的时候用的一致。
+    reference_depthdir = depth_dirs[5] ## 5 is the reference frame        align scale       。
     basename = os.path.basename(reference_depthdir)
 
     reference_depth = np.load(reference_depthdir)
@@ -310,7 +310,7 @@ def align_all_frames(depth_dirs:list, st_predicted,new_scale_alignFrame0:dict,st
         cur_t= st_predicted[cur_depth_name]["shift"]
         cur_masked_depth = depth[static_msk]
         if not np.isnan(cur_s) or not np.isnan(cur_t):
-            pass ## 都不是nan
+            pass ##    nan
         else:
             cur_s = st_predicted["mean_s"]
             cur_t = st_predicted["mean_t"]

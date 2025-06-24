@@ -116,7 +116,7 @@ class NVPSimplified(nn.Module):
         while i < n_layers:
             mask_selection.append(torch.randperm(input_dims))
             i += input_dims
-        mask_selection = torch.cat(mask_selection) ## 2024年3月26日10:58:20：【0,1,2,0,2,1】'240326_105658'
+        mask_selection = torch.cat(mask_selection) ## 2024 3 26 10:58:20：【0,1,2,0,2,1】'240326_105658'
 
         if isinstance(hidden_size, int):
             hidden_size = [hidden_size]

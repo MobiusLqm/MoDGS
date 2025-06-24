@@ -46,9 +46,9 @@ def loadCam(args, id, cam_info, resolution_scale):
 
     resized_image_rgb = PILtoTorch(cam_info.image, resolution)
     resized_mask= cv2.resize(cam_info.mask, (resolution[0],resolution[1])) if cam_info.mask is not None else None
-    if cam_info.image_path.split('/')[-3]=="rgb" or cam_info.image_path.split('/')[-3].startswith("rgb"): ## Hyper NeRF 或者iphone 数据集, 
+    if cam_info.image_path.split('/')[-3]=="rgb" or cam_info.image_path.split('/')[-3].startswith("rgb"): ## Hyper NeRF   iphone    , 
         data_root = '/'.join(cam_info.image_path.split('/')[:-3])
-    else:### ## 其他数据集
+    else:### ##      
         data_root = '/'.join(cam_info.image_path.split('/')[:-2])
     folder = cam_info.image_path.split('/')[-2]
     
@@ -64,7 +64,7 @@ def loadCam(args, id, cam_info, resolution_scale):
         flow_folder = "flow_dontexist"
     
     ## Qingming 
-    flow_folder = "None" ## TODO: 为了不用flow, 先设置为None
+    flow_folder = "None" ## TODO:     flow,     None
     
     
     fwd_flow_path = os.path.join(data_root, flow_folder, f'{os.path.splitext(image_name)[0]}_fwd.npz')
@@ -106,7 +106,7 @@ def loadCam(args, id, cam_info, resolution_scale):
         if not cam_info.depth.squeeze().shape==(resolution[1],resolution[0]):
             resized_depth=cv2.resize(resized_depth, (resolution[0],resolution[1]))
     else :
-        depth_folder_postfit=  folder[6:]     ## 获取/2x 或者1x   
+        depth_folder_postfit=  folder[6:]     ##   /2x   1x   
         if args.depth_folder =="None":## if not specified, use the default depth folder
             depth_path_png=os.path.join(data_root, 'depth'+depth_folder_postfit, f'{os.path.splitext(image_name)[0]}.png')
         else:
@@ -117,7 +117,7 @@ def loadCam(args, id, cam_info, resolution_scale):
         else:## for Iphone dataset they has gt depth stored in npy file,
             depth_path_npy=os.path.join(data_root, 'depth',cam_info.image_path.split('/')[-2], f'{os.path.splitext(image_name)[0]}.npy')
             if os.path.exists(depth_path_npy):
-                depth= np.load(depth_path_npy)*cam_info.coord_scale ## FIXME:  chekc这里是不是需要乘这个coord_scale.需要吗？
+                depth= np.load(depth_path_npy)*cam_info.coord_scale ## FIXME:  chekc          coord_scale.   ？
                 resized_depth=cv2.resize(depth, (resolution[0],resolution[1]))
             del depth_path_npy
     gt_image = resized_image_rgb[:3, ...]
@@ -132,7 +132,7 @@ def loadCam(args, id, cam_info, resolution_scale):
                   image_name=cam_info.image_name, uid=id, time=cam_info.time, data_device=args.data_device,
                   fwd_flow=fwd_flow, fwd_flow_mask=fwd_flow_mask,
                   bwd_flow=bwd_flow, bwd_flow_mask=bwd_flow_mask,
-                  dict_other=cam_info.dict_other if hasattr(cam_info,"dict_other") else None, ### dict other 存储的是 Exhaustive raft info
+                  dict_other=cam_info.dict_other if hasattr(cam_info,"dict_other") else None, ### dict other      Exhaustive raft info
                   mask=resized_mask if cam_info.mask is not None else None)
 
 def loadCam2(args, id, cam_info, resolution_scale):
@@ -164,7 +164,7 @@ def cameraList_from_camInfos(cam_infos, resolution_scale, args,pcd_interval=1):
             # camera_list[i].prev = copy.deepcopy(camera_list[i-1])
             camera_list[i].prev = camera_list[i-1]
             try:
-                assert int(camera_list[i].prev.image_name[-3:])==int(camera_list[i].image_name[-3:])-pcd_interval  ## 考虑dynerf的情况，image name不一定是数字
+                assert int(camera_list[i].prev.image_name[-3:])==int(camera_list[i].image_name[-3:])-pcd_interval  ##   dynerf   ，image name      
             except AssertionError as e:
                 print("MISSMATCH PreviousLink: ",camera_list[i].prev.image_name, camera_list[i].image_name)
                 # camera_list[i].prev = None

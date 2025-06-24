@@ -1,6 +1,6 @@
 import numpy as np
 import sys   
-# sys.setrecursionlimit(100000) #例如这里设置为十万  ??
+# sys.setrecursionlimit(100000) #           ??
 import numpy as np
 from arguments import ModelParams, PipelineParams, get_combined_args,OptimizationParams
 import torch
@@ -52,7 +52,7 @@ def get_pxl_grid(width,height):
 
 def unproject_from_depthmap(c2w,intrinsic,depth:np.array,depth_mask=None):
     """depth: (h,w)"""
-    """这个函数不对depth 为0的区域做mask，"""
+    """      depth  0    mask，"""
     (h,w)=depth.shape
     px, py = np.meshgrid(
         
@@ -225,18 +225,18 @@ class Flow3D_Extraction:
                 trajectories= torch.full([depth_mask.sum(),1,9],torch.nan).to(self.device) ## xyz(world coords)+rgb (color)+ (img coords)+ time frame T
                 trajectories[:,0,:3]=world_xyz[depth_mask]
                 trajectories[:,0,3:6]=rgb_img[depth_mask]
-                trajectories[:,0,6:8]=self.template_grid[depth_mask].to(trajectories) ## 先(w dimension,h dimension)
+                trajectories[:,0,6:8]=self.template_grid[depth_mask].to(trajectories) ##  (w dimension,h dimension)
                 trajectories[:,0,-1:]=frame_id
-                latest_frame_pixel_mask = torch.ones([trajectories.shape[0],]).to(self.device).to(torch.bool) ## 表示
+                latest_frame_pixel_mask = torch.ones([trajectories.shape[0],]).to(self.device).to(torch.bool) ##   
                  ## 
                 # N,_=coords.shape ## N,2
 
                 # ## construct 3d Points.
-                # next_coords=flow_dict["fwd_flow"].round().to(torch.int32)+self.template_grid ## TODO：取整还是不取整
+                # next_coords=flow_dict["fwd_flow"].round().to(torch.int32)+self.template_grid ## TODO：       
                 # coords_maskY = torch.logical_and(next_coords[:,0]>=0,next_coords[:,0]<self.height)
                 # coords_maskX = torch.logical_and(next_coords[:,1]>=0,next_coords[:,1]<self.width)
                 # coords_mask= torch.logical_and(coords_maskY,coords_maskX)
-                # coords_mask = torch.logical_and(coords_mask,flow_dict["fwd_flow_mask"].unsqueeze(0)) ## 去掉超出边界的点和flow mask为0的点。
+                # coords_mask = torch.logical_and(coords_mask,flow_dict["fwd_flow_mask"].unsqueeze(0)) ##          flow mask 0  。
                 # coords_mask = torch.logical_and(coords_mask,depth_mask.unsqueeze(0))
                 # n_valid_points = coords_mask.sum()
                 # trajectories= torch.full([n_valid_points,1,9],torch.nan).to(self.device)
@@ -270,7 +270,7 @@ class Flow3D_Extraction:
                 # trajectories = torch.cat([trajectories,trajectory],1)
                 # coords_lastframe = torch.tensor(trajectories[latest_frame_pixel_mask,-1,6:8],dtype=torch.long)
                 coords_lastframe = trajectories[latest_frame_pixel_mask,-1,6:8].to(torch.long)
-                coords_1d = self.mapping_table[coords_lastframe[:,1],coords_lastframe[:,0]] ### 从2d坐标转换到1d坐标
+                coords_1d = self.mapping_table[coords_lastframe[:,1],coords_lastframe[:,0]] ###  2d     1d  
                 coords_1d = coords_1d.to(torch.long)
                 
                 empty_trajectory = torch.full([trajectories.shape[0],1,9],torch.nan).to(self.device)
@@ -287,7 +287,7 @@ class Flow3D_Extraction:
         self.time_pcd = trajectories   
         self.fwd_flow_matrix = torch.zeros((self.time_pcd.shape[0],T,3),device=self.device)
         fwd_flow_matrix = self.fwd_flow_matrix
-        for t in tqdm(range(trajectories.shape[1]-1)): ## T-1条flow
+        for t in tqdm(range(trajectories.shape[1]-1)): ## T-1 flow
             # for n in range(N):
             nonan_msk = torch.logical_not(torch.isnan(self.time_pcd[:,t,:]).any(1))
             pcd_t = self.time_pcd[nonan_msk,t,:]
@@ -309,8 +309,8 @@ class Flow3D_Extraction:
         return:
             N: int, the number of valid points( according to the depth mask valid pixel number)
             trajectory: (N,1,9) 3D points + rgb + 2d index of image coords()+time frame T
-            coords_mask: (N,1) mask of the valid points(表示没有超出边界的点，以及fwd flow mask为1的点)
-            full_next_coords_depth_mask: (N,1) mask of the valid points (表示warp 到下一帧的坐标点是有深度值的mask。)
+            coords_mask: (N,1) mask of the valid points(          ，  fwd flow mask 1  )
+            full_next_coords_depth_mask: (N,1) mask of the valid points (  warp               mask。)
             unvisited_coords: (N,2) 2D coords of the unvisited points which has valid depth value.
         """
         world_xyz,depth_mask,rgb_img,flow_dict,imgname=self.train_cams[frame_id]
@@ -321,13 +321,13 @@ class Flow3D_Extraction:
         # N,_=coords.shape ## N,2
         print(imgname)
         trajectory= torch.full([self.width*self.height,1,9],torch.nan).to(self.device) ## xyz(world coords)+rgb (color)+ (img coords)+ time frame T
-        next_coords=flow_dict["fwd_flow"].round().to(torch.long)+self.template_grid ## TODO：取整还是不取整
-        next_coords = next_coords[depth_mask] ## 现在直接去掉depth mask为0的点。
+        next_coords=flow_dict["fwd_flow"].round().to(torch.long)+self.template_grid ## TODO：       
+        next_coords = next_coords[depth_mask] ##       depth mask 0  。
         
-        coords_maskX = torch.logical_and(next_coords[:,0]>=0,next_coords[:,0]<self.width) ## (先w，后h方向)
+        coords_maskX = torch.logical_and(next_coords[:,0]>=0,next_coords[:,0]<self.width) ## ( w， h  )
         coords_maskY = torch.logical_and(next_coords[:,1]>=0,next_coords[:,1]<self.height)
         coords_mask= torch.logical_and(coords_maskY,coords_maskX)
-        coords_mask = torch.logical_and(coords_mask,flow_dict["fwd_flow_mask"][depth_mask]) ## 去掉超出边界的点和flow mask为0的点。
+        coords_mask = torch.logical_and(coords_mask,flow_dict["fwd_flow_mask"][depth_mask]) ##          flow mask 0  。
         
         # coords_mask = torch.logical_and(coords_mask,depth_mask.unsqueeze(0))
         # coords_mask = coords_mask[depth_mask]
@@ -344,12 +344,12 @@ class Flow3D_Extraction:
         sampled_rgb = rgb_img_next[coords[:,1],coords[:,0]]
         sampled_depth_mask = depth_mask_next[coords[:,1],coords[:,0]]
         
-        unvisited_mask = depth_mask_next.clone() ## 如果下一帧的点有深度值，但是没有被fwd warp覆盖到，那么就是unvisited的点。
+        unvisited_mask = depth_mask_next.clone() ##            ，     fwd warp   ，    unvisited  。
         unvisited_mask[coords[:,1],coords[:,0]]=False
-        unvisited_coords = torch.stack(torch.where(unvisited_mask)[::-1],1) ## ## unvisited_coords(N_unvisited,2)  (坐标，先w，后h方向)
+        unvisited_coords = torch.stack(torch.where(unvisited_mask)[::-1],1) ## ## unvisited_coords(N_unvisited,2)  (  ， w， h  )
 
         full_next_coords_depth_mask  = torch.zeros([trajectory.shape[0],]).to(self.device).to(torch.bool)
-        temp= torch.zeros([depth_mask.sum(),1]).to(self.device).to(torch.bool) ### 为什么要用一个中间值，因为发现连续索引赋值会出现问题。
+        temp= torch.zeros([depth_mask.sum(),1]).to(self.device).to(torch.bool) ###           ，               。
         temp[coords_mask,0]=sampled_depth_mask
         full_next_coords_depth_mask[depth_mask.reshape(-1)]=temp[:,0]
         # full_next_coords_depth_mask[depth_mask.reshape(-1)][coords_mask,0]=sampled_depth_mask
@@ -379,8 +379,8 @@ class Flow3D_Extraction:
         
     def backward_warp(self,frame_id,coords,align_corners=True):
         """Using bwd flow to warp the Generated point clouds to the previous frame
-            coords: (N,2) 2D coordinates  ## (坐标先w,后h方向)
-            递归式的backward warp去补全前面的frame里面缺失的点， 在第一次调用的时候实际上coord是整形，但是在在被下一次调用的的时候，coords是float类型的，所以用grid sample。
+            coords: (N,2) 2D coordinates  ## (   w, h  )
+                backward warp      frame      ，             coord   ，              ，coords float   ，   grid sample。
                         
         """
         world_xyz,depth_mask,rgb_img,flow_dict,imgname=self.train_cams[frame_id]
@@ -397,19 +397,19 @@ class Flow3D_Extraction:
         
         ## tensor
     
-        # normalize_query_points = normalize_query_points[:,[1,0]]## 逆天，这经过测试这个好像不需要。
-        ### 需要把normalize_query_points的最后一个维度换一下顺序。从先w方向坐标后h方向坐标换成  先h，后w
+        # normalize_query_points = normalize_query_points[:,[1,0]]##   ，            。
+        ###    normalize_query_points            。  w     h         h， w
         sampled_flow = F.grid_sample(flow_dict["bwd_flow"].permute(2,0,1).unsqueeze(0),normalize_query_points.unsqueeze(0).unsqueeze(0),mode="bilinear",padding_mode="border",align_corners=align_corners)
         sampled_flow_mask = F.grid_sample(flow_dict["bwd_flow_mask"].unsqueeze(0).unsqueeze(0).float(),normalize_query_points.unsqueeze(0).unsqueeze(0),mode="bilinear",padding_mode="border",align_corners=align_corners)
         sampled_flow = sampled_flow.permute(0,2,3,1).squeeze(0).squeeze(0)
-        valid_mask = sampled_flow_mask.squeeze(0).squeeze(0).squeeze(0)>1.0-1e-5 ## 这里 1.0-1e-7 是为了防止采样点落在边界上。
+        valid_mask = sampled_flow_mask.squeeze(0).squeeze(0).squeeze(0)>1.0-1e-5 ##    1.0-1e-7              。
         sampled_flow = sampled_flow#[valid_mask]
         query_points= query_points#[valid_mask]
         
         
-        ## 这里需要考虑一下，如遇coords_previous_img超出边界的情况。
-        coords_previous_img=sampled_flow+query_points## 这里coords 又是先w，后h的，
-        coords_maskX = torch.logical_and(coords_previous_img[:,0]>=0,coords_previous_img[:,0]<self.width) ## (先w，后h方向)
+        ##         ，  coords_previous_img       。
+        coords_previous_img=sampled_flow+query_points##   coords    w， h ，
+        coords_maskX = torch.logical_and(coords_previous_img[:,0]>=0,coords_previous_img[:,0]<self.width) ## ( w， h  )
         coords_maskY = torch.logical_and(coords_previous_img[:,1]>=0,coords_previous_img[:,1]<self.height)
         coords_mask= torch.logical_and(coords_maskY,coords_maskX)
         valid_mask= torch.logical_and(coords_mask,valid_mask)
@@ -419,28 +419,28 @@ class Flow3D_Extraction:
         world_xyz_pre,depth_mask_pre,rgb_img_pre,flow_dict_pre,_=previous_frame_data
         # normalize_query_points_pre = 2*coords_previous_img/torch.tensor([self.height-1,self.width-1],device=self.device)-1.0
         normalize_query_points_pre = 2*coords_previous_img/torch.tensor([self.width-1,self.height-1],device=self.device)-1.0
-        # normalize_query_points_pre = normalize_query_points_pre[:,[1,0]] ### 需要把normalize_query_points的最后一个维度换一下顺序。从先w方向坐标后h方向坐标换成  先h，后w
-        ## TODO:考虑depthmask，如果depthmask为0，那么就不需要进行采样。
-        ## 以及 bwd flow mask，如果mask为0，那么就不需要进行采样。
+        # normalize_query_points_pre = normalize_query_points_pre[:,[1,0]] ###    normalize_query_points            。  w     h         h， w
+        ## TODO:  depthmask，  depthmask 0，          。
+        ##    bwd flow mask，  mask 0，          。
         
         
         sampled_world_xyz = F.grid_sample(world_xyz_pre.permute(2,0,1).unsqueeze(0),normalize_query_points_pre.unsqueeze(0).unsqueeze(0),mode="bilinear",padding_mode="border",align_corners=align_corners)
         sampled_depth_mask = F.grid_sample(depth_mask_pre.unsqueeze(0).unsqueeze(0).float(),normalize_query_points_pre.unsqueeze(0).unsqueeze(0),mode="bilinear",padding_mode="border",align_corners=align_corners)
         sampled_rgb = F.grid_sample(rgb_img_pre.permute(2,0,1).unsqueeze(0).float(),normalize_query_points_pre.unsqueeze(0).unsqueeze(0),mode="bilinear",padding_mode="border",align_corners=align_corners)
         ### filter invalid points
-        # valid_mask_depth = sampled_depth_mask.squeeze()>1.0-1e-5  ## 这里还不能用 squeeze（），如果只有一个值的话，会全部出错 ## 因为这个mask是双线性插值得到的，所以判断小于1的话，是不在mask区域。
-        valid_mask_depth = sampled_depth_mask.squeeze(0).squeeze(0).squeeze(0)>1.0-1e-5 ## 因为这个mask是双线性插值得到的，所以判断小于1的话，是不在mask区域。
+        # valid_mask_depth = sampled_depth_mask.squeeze()>1.0-1e-5  ##        squeeze（），         ，      ##     mask         ，      1  ，   mask  。
+        valid_mask_depth = sampled_depth_mask.squeeze(0).squeeze(0).squeeze(0)>1.0-1e-5 ##     mask         ，      1  ，   mask  。
         selected_xyz = sampled_world_xyz.permute(0,2,3,1).squeeze(0).squeeze(0)[valid_mask_depth]
         selected_coords = coords_previous_img[valid_mask_depth]
         selected_rgb = sampled_rgb.permute(0,2,3,1).squeeze(0).squeeze(0)[valid_mask_depth]
         
         
         
-        ### add valid points to tranjectory ### 连续索引赋值会出现问题，所以用一个中间值。
+        ### add valid points to tranjectory ###            ，        。
         temp_trajectory = torch.full([torch.sum(valid_mask),1,9],torch.nan).to(self.device)
         temp_trajectory[valid_mask_depth,0,:3]=selected_xyz
         temp_trajectory[valid_mask_depth,0,3:6]=selected_rgb
-        temp_trajectory[valid_mask_depth,0,6:8]=selected_coords ## (先w，后h方向)
+        temp_trajectory[valid_mask_depth,0,6:8]=selected_coords ## ( w， h  )
         temp_trajectory[valid_mask_depth,0,-1:]=frame_id-1
         
         trajectory[valid_mask]=temp_trajectory
@@ -464,7 +464,7 @@ class Flow3D_Extraction:
                 trajectory_previous= torch.full([N,f_num,9],torch.nan).to(self.device)
                 
                 
-                trajectory_previous[mask]=trajectory_pre ## TODO:check 一下会不会有和numpy一样的行为（多重索引无法赋值)
+                trajectory_previous[mask]=trajectory_pre ## TODO:check        numpy     （        )
                 trajectory =torch.cat([trajectory_previous,trajectory],1)   
         
             
@@ -474,8 +474,8 @@ class Flow3D_Extraction:
         pass       
     def backward_warp1(self,frame_id,coords,align_corners=True):
         """Using bwd flow to warp the Generated point clouds to the previous frame
-            coords: (N,2) 2D coordinates  ## (坐标先w,后h方向)
-            递归式的backward warp去补全前面的frame里面缺失的点， 在第一次调用的时候实际上coord是整形，但是在在被下一次调用的的时候，coords是float类型的，所以用grid sample。
+            coords: (N,2) 2D coordinates  ## (   w, h  )
+                backward warp      frame      ，             coord   ，              ，coords float   ，   grid sample。
                         
         """
         world_xyz,depth_mask,rgb_img,flow_dict,imgname=self.train_cams[frame_id]
@@ -492,30 +492,30 @@ class Flow3D_Extraction:
         ## tensor
     
         normalize_query_points = normalize_query_points[:,[1,0]]
-        ### 需要把normalize_query_points的最后一个维度换一下顺序。从先w方向坐标后h方向坐标换成  先h，后w
+        ###    normalize_query_points            。  w     h         h， w
         sampled_flow = F.grid_sample(flow_dict["bwd_flow"].permute(2,0,1).unsqueeze(0),normalize_query_points.unsqueeze(0).unsqueeze(0),mode="bilinear",padding_mode="border",align_corners=align_corners)
         sampled_flow_mask = F.grid_sample(flow_dict["bwd_flow_mask"].unsqueeze(0).unsqueeze(0).float(),normalize_query_points.unsqueeze(0).unsqueeze(0),mode="bilinear",padding_mode="border",align_corners=align_corners)
         sampled_flow = sampled_flow.permute(0,2,3,1).squeeze(0).squeeze(0)
-        valid_mask = sampled_flow_mask.squeeze(0).squeeze(0).squeeze(0)>1.0-1e-5 ## 这里 1.0-1e-7 是为了防止采样点落在边界上。
+        valid_mask = sampled_flow_mask.squeeze(0).squeeze(0).squeeze(0)>1.0-1e-5 ##    1.0-1e-7              。
         sampled_flow = sampled_flow[valid_mask]
         query_points= query_points[valid_mask]
         
         
         
-        coords_previous_img=sampled_flow+query_points## 这里coords 又是先w，后h的，
+        coords_previous_img=sampled_flow+query_points##   coords    w， h ，
         previous_frame_data = self.train_cams[frame_id-1]
         world_xyz_pre,depth_mask_pre,rgb_img_pre,flow_dict_pre,_=previous_frame_data
         normalize_query_points_pre = 2*coords_previous_img/torch.tensor([self.height-1,self.width-1],device=self.device)-1.0
-        normalize_query_points_pre = normalize_query_points_pre[:,[1,0]] ### 需要把normalize_query_points的最后一个维度换一下顺序。从先w方向坐标后h方向坐标换成  先h，后w
-        ## TODO:考虑depthmask，如果depthmask为0，那么就不需要进行采样。
-        ## 以及 bwd flow mask，如果mask为0，那么就不需要进行采样。
+        normalize_query_points_pre = normalize_query_points_pre[:,[1,0]] ###    normalize_query_points            。  w     h         h， w
+        ## TODO:  depthmask，  depthmask 0，          。
+        ##    bwd flow mask，  mask 0，          。
         
         
         sampled_world_xyz = F.grid_sample(world_xyz_pre.permute(2,0,1).unsqueeze(0),normalize_query_points_pre.unsqueeze(0).unsqueeze(0),mode="bilinear",padding_mode="border",align_corners=align_corners)
         sampled_depth_mask = F.grid_sample(depth_mask_pre.unsqueeze(0).unsqueeze(0).float(),normalize_query_points_pre.unsqueeze(0).unsqueeze(0),mode="bilinear",padding_mode="border",align_corners=align_corners)
         sampled_rgb = F.grid_sample(rgb_img_pre.permute(2,0,1).unsqueeze(0).float(),normalize_query_points_pre.unsqueeze(0).unsqueeze(0),mode="bilinear",padding_mode="border",align_corners=align_corners)
         ### filter invalid points
-        valid_mask_depth = sampled_depth_mask.squeeze()>1.0-1e-5 ## 因为这个mask是双线性插值得到的，所以判断小于1的话，是不在mask区域。
+        valid_mask_depth = sampled_depth_mask.squeeze()>1.0-1e-5 ##     mask         ，      1  ，   mask  。
         selected_xyz = sampled_world_xyz.permute(0,2,3,1).squeeze()[valid_mask_depth]
         selected_coords = coords_previous_img[valid_mask_depth]
         selected_rgb = sampled_rgb.permute(0,2,3,1).squeeze()[valid_mask_depth]
@@ -548,7 +548,7 @@ class Flow3D_Extraction:
                 trajectory_previous= torch.full([N,f_num,9],torch.nan)
                 
                 
-                trajectory_previous[mask][mask_pre ]=trajectory_pre[mask_pre] ## TODO:check 一下会不会有和numpy一样的行为（多重索引无法赋值)
+                trajectory_previous[mask][mask_pre ]=trajectory_pre[mask_pre] ## TODO:check        numpy     （        )
                 trajectory =torch.cat([trajectory_previous,trajectory],1)   
         
             
@@ -588,28 +588,28 @@ class Flow3D_Extraction:
                     if not depth_mask[idy,idx]:
                         
                         continue
-                    if  i==0: ## 如果这个点有深度，并且是第一帧，那么就开始递归。
+                    if  i==0: ##         ，      ，       。
                         trajectory=[]
                         cur={"frame_id":i,"coord_uv":(idy,idx),"coord_xyz":world_xyz[idy,idx],"rgb":rgb_img[idy,idx],"start":True}
                         trajectory.append(cur)
-                        self.states_table[i,idy,idx]=True ## 标记当前点已经访问过了。
-                        if flow_dict["fwd_flow_mask"] is not None and  flow_dict["fwd_flow_mask"][idy,idx] : ## 如果flow mask 为1，说明这个点在下一帧中可能有对应的点。反之则消失。
+                        self.states_table[i,idy,idx]=True ##            。
+                        if flow_dict["fwd_flow_mask"] is not None and  flow_dict["fwd_flow_mask"][idy,idx] : ##   flow mask  1，                 。     。
                             # next_idy,nex_idx = (idy,idx) +flow_dict["fwd_flow"][idy,idx].round().astype(np.int32)
                             next_idx,next_idy = torch.tensor((idx,idy)) +flow_dict["fwd_flow"][idy,idx].round().to(torch.int32)
-                            ## flow 是先w，后h
+                            ## flow   w， h
                             
                             self.recursion_step(i+1,(next_idy,next_idx),trajectory)
                         points_trajectories.append(trajectory)
                     elif i>0 and i%5==0 and  not self.states_table[i,idy,idx] : 
                     
                     # elif i>0  and flow_dict["bwd_flow_mask"] is not None and not(flow_dict["bwd_flow_mask"][idy,idx]): 
-                        ## 如果这个点有深度，并且不是是第一帧，并且没有被访问过，并且这个点的bwd_flow_mask为False(说明这个点会产生轨迹)，那么就开始递归。
+                        ##         ，        ，        ，      bwd_flow_mask False(          )，       。
                         
                         cur={"frame_id":i,"coord_uv":(idy,idx),"coord_xyz":world_xyz[idy,idx],"rgb":rgb_img[idy,idx],"start":True}
                         self.states_table[i,idy,idx]=True
                         trajectory=[]
                         trajectory.append(cur)
-                        if flow_dict["fwd_flow_mask"] is not None and flow_dict["fwd_flow_mask"][idy,idx] : ## 如果flow mask 为1，说明这个点在下一帧中可能有对应的点。反之则消失。
+                        if flow_dict["fwd_flow_mask"] is not None and flow_dict["fwd_flow_mask"][idy,idx] : ##   flow mask  1，                 。     。
                             # next_idy,nex_idx = (idy,idx) +flow_dict["fwd_flow"][idy,idx].round().astype(np.int32)
                             next_idx,next_idy = torch.tensor((idx,idy)) +flow_dict["fwd_flow"][idy,idx].round().to(torch.int32)
                             self.recursion_step(i+1,(next_idy,next_idx),trajectory)
@@ -621,12 +621,12 @@ class Flow3D_Extraction:
             
     def recursion_step(self,frame_id,coords,trajectory):
         
-        idy,idx=coords ## 二维图像的坐标。
-        if idx<0 or idx>=self.width or idy<0 or idy>=self.height or frame_id>=len(self.train_cams) or self.states_table[frame_id,idy,idx]:## TODO： 这里需要考虑一下，判断是否访问过是不是太强了
+        idy,idx=coords ##        。
+        if idx<0 or idx>=self.width or idy<0 or idy>=self.height or frame_id>=len(self.train_cams) or self.states_table[frame_id,idy,idx]:## TODO：         ，             
             return
         world_xyz,depth_mask,rgb_img,flow_dict,imgname=self.train_cams[frame_id]
         # if not depth_mask[idy,idx] or (flow_dict["bwd_flow_mask"] is not None and not(flow_dict["bwd_flow_mask"][idy,idx])) :
-                    ## 如果这个坐标depth没有值没有点  or  这个坐标的bwdmask是0(说明这里将会产生点，这种情况会单独处理)  or 这个点已经被访问过 直接返回。
+                    ##       depth        or       bwdmask 0(         ，         )  or               。
        
         self.states_table[frame_id,idy,idx]=True
         if not depth_mask[idy,idx]:
@@ -636,7 +636,7 @@ class Flow3D_Extraction:
         else:
             cur={"frame_id":frame_id,"coord_uv":(idy,idx),"coord_xyz":world_xyz[idy,idx],"rgb":rgb_img[idy,idx]}
             trajectory.append(cur)
-            if flow_dict["fwd_flow_mask"] is not None and flow_dict["fwd_flow_mask"][idy,idx] and frame_id+1<len(self.train_cams) :## 如果flow mask 为1，说明这个点在下一帧中可能有对应的点。反之则消失。 判断是否是最后一帧。
+            if flow_dict["fwd_flow_mask"] is not None and flow_dict["fwd_flow_mask"][idy,idx] and frame_id+1<len(self.train_cams) :##   flow mask  1，                 。     。          。
                 # next_idy,nex_idx = (idy,idx) +flow_dict["fwd_flow"][idy,idx].round().astype(np.int32)
                 next_idx,next_idy = torch.tensor((idx,idy)) +flow_dict["fwd_flow"][idy,idx].round().to(torch.int32)
                 
@@ -732,7 +732,7 @@ class Flow3D_Extraction:
             trajectory[:,:3]=world_xyz[depth_mask]
             trajectory[:,3:6]=rgb_img[depth_mask]
             trajectory[:,-1:]=frame_id
-            # latest_frame_pixel_mask = torch.ones([trajectories.shape[0],]).to(self.device).to(torch.bool) ## 表示
+            # latest_frame_pixel_mask = torch.ones([trajectories.shape[0],]).to(self.device).to(torch.bool) ##   
             # pcd_pre=None
             # pcd_next=None
             current_frame = {"frame_id":frame_id,"pcd":trajectory}
@@ -744,7 +744,7 @@ class Flow3D_Extraction:
                 pre_coords=flow_dict["bwd_flow"][depth_mask]+self.template_grid[depth_mask] #
                 valid_mask = flow_dict["bwd_flow_mask"][depth_mask]
                 
-                coords_maskX = torch.logical_and(pre_coords[:,0]>=0,pre_coords[:,0]<self.width) ## (先w，后h方向)
+                coords_maskX = torch.logical_and(pre_coords[:,0]>=0,pre_coords[:,0]<self.width) ## ( w， h  )
                 coords_maskY = torch.logical_and(pre_coords[:,1]>=0,pre_coords[:,1]<self.height)
                 coords_mask= torch.logical_and(coords_maskY,coords_maskX)
                 valid_mask= torch.logical_and(coords_mask,valid_mask)
@@ -759,7 +759,7 @@ class Flow3D_Extraction:
                 sampled_depth_mask = F.grid_sample(depth_mask_pre.unsqueeze(0).unsqueeze(0).float(),normalize_query_points_pre.unsqueeze(0).unsqueeze(0),mode="bilinear",padding_mode="border",align_corners=align_corners)
                 sampled_rgb = F.grid_sample(rgb_img_pre.permute(2,0,1).unsqueeze(0).float(),normalize_query_points_pre.unsqueeze(0).unsqueeze(0),mode="bilinear",padding_mode="border",align_corners=align_corners)
                 
-                valid_mask_depth = sampled_depth_mask.squeeze(0).squeeze(0).squeeze(0)>1.0-1e-5 ## 因为这个mask是双线性插值得到的，所以判断小于1的话，是不在mask区域。
+                valid_mask_depth = sampled_depth_mask.squeeze(0).squeeze(0).squeeze(0)>1.0-1e-5 ##     mask         ，      1  ，   mask  。
                 valid_mask = torch.logical_and(valid_mask,valid_mask_depth)
                 
                 pcd_pre[valid_mask,:3]=sampled_world_xyz.permute(0,2,3,1).squeeze(0).squeeze(0)[valid_mask]
@@ -777,7 +777,7 @@ class Flow3D_Extraction:
                 next_coords=flow_dict["fwd_flow"][depth_mask]+self.template_grid[depth_mask] #
                 
                 valid_mask = flow_dict["fwd_flow_mask"][depth_mask]
-                coords_maskX = torch.logical_and(next_coords[:,0]>=0,next_coords[:,0]<self.width) ## (先w，后h方向)
+                coords_maskX = torch.logical_and(next_coords[:,0]>=0,next_coords[:,0]<self.width) ## ( w， h  )
                 coords_maskY = torch.logical_and(next_coords[:,1]>=0,next_coords[:,1]<self.height)
                 coords_mask= torch.logical_and(coords_maskY,coords_maskX)
                 valid_mask= torch.logical_and(coords_mask,valid_mask)
@@ -792,7 +792,7 @@ class Flow3D_Extraction:
                 sampled_depth_mask = F.grid_sample(depth_mask_next.unsqueeze(0).unsqueeze(0).float(),normalize_query_points_next.unsqueeze(0).unsqueeze(0),mode="bilinear",padding_mode="border",align_corners=align_corners)
                 sampled_rgb = F.grid_sample(rgb_img_next.permute(2,0,1).unsqueeze(0).float(),normalize_query_points_next.unsqueeze(0).unsqueeze(0),mode="bilinear",padding_mode="border",align_corners=align_corners)
                 
-                valid_mask_depth = sampled_depth_mask.squeeze(0).squeeze(0).squeeze(0)>1.0-1e-5 ## 因为这个mask是双线性插值得到的，所以判断小于1的话，是不在mask区域。
+                valid_mask_depth = sampled_depth_mask.squeeze(0).squeeze(0).squeeze(0)>1.0-1e-5 ##     mask         ，      1  ，   mask  。
                 valid_mask = torch.logical_and(valid_mask,valid_mask_depth)
                 
                 pcd_next[valid_mask,:3]=sampled_world_xyz.permute(0,2,3,1).squeeze(0).squeeze(0)[valid_mask]
@@ -823,10 +823,10 @@ class Flow3D_Extraction:
         # imgname_to_index_dict =  {}
         # for frame_id, cam in tqdm(enumerate(self.train_cams)):
             
-        #     imgname_to_index_dict[imgname] = frame_id ### 获得 imgname 和 frame_id 的对应关系 如 0_0000.png -> 0
+        #     imgname_to_index_dict[imgname] = frame_id ###    imgname   frame_id         0_0000.png -> 0
         
         pbar =tqdm(self.train_cams.keys())
-        for frame_name in  pbar: ### 遍历 query frame 
+        for frame_name in  pbar: ###    query frame 
             # world_xyz,depth_mask,rgb_img,flow_dict,imgname = cam
             world_xyz,depth_mask,rgb_img,exhaustive_flow_dict,imgname=self.train_cams[frame_name ]
             print("sovling frame:",frame_name ,"imgname:",imgname)
@@ -840,7 +840,7 @@ class Flow3D_Extraction:
             # trajectory[:,-1:]=frame_id
             current_frame = {"frame_id":frame_id,"pcd":trajectory,"imgname":imgname,"target_dicts":{}}
             pbar_inner = tqdm(self.train_cams.keys())
-            for frame_name_target in pbar_inner: ## 遍历target frame
+            for frame_name_target in pbar_inner: ##   target frame
                 if frame_name==frame_name_target:
                     # print("frame_name==frame_name_target")
                     # print(frame_name,frame_name_target)
@@ -855,12 +855,12 @@ class Flow3D_Extraction:
 
                 pcd_target = torch.full([depth_mask.sum(),6],torch.nan).to(self.device)
                 target_coords=flow[depth_mask]+self.template_grid[depth_mask] #
-                valid_mask = flow_mask[depth_mask][:,0] ##NOTE: 这里只选了channel 0
+                valid_mask = flow_mask[depth_mask][:,0] ##NOTE:      channel 0
                 # print("valid sum flow msk,channel0",valid_mask[:,0].sum(),"channel1",valid_mask[:,1].sum(),"channel1and2",torch.logical_and(valid_mask[:,1],valid_mask[:,0]).sum())
                 # break 
                 
                 
-                coords_maskX = torch.logical_and(target_coords[:,0]>=0,target_coords[:,0]<self.width) ## (先w，后h方向)
+                coords_maskX = torch.logical_and(target_coords[:,0]>=0,target_coords[:,0]<self.width) ## ( w， h  )
                 coords_maskY = torch.logical_and(target_coords[:,1]>=0,target_coords[:,1]<self.height)
                 coords_mask= torch.logical_and(coords_maskY,coords_maskX)
                 valid_mask= torch.logical_and(coords_mask,valid_mask)
@@ -873,7 +873,7 @@ class Flow3D_Extraction:
                 sampled_depth_mask = F.grid_sample(depth_mask_target.unsqueeze(0).unsqueeze(0).float(),normalize_query_points_target.unsqueeze(0).unsqueeze(0),mode="bilinear",padding_mode="border",align_corners=align_corners)
                 sampled_rgb = F.grid_sample(rgb_img_target.permute(2,0,1).unsqueeze(0).float(),normalize_query_points_target.unsqueeze(0).unsqueeze(0),mode="bilinear",padding_mode="border",align_corners=align_corners)
                 
-                valid_mask_depth = sampled_depth_mask.squeeze(0).squeeze(0).squeeze(0)>1.0-1e-5 ## 因为这个mask是双线性插值得到的，所以判断小于1的话，是不在mask区域。
+                valid_mask_depth = sampled_depth_mask.squeeze(0).squeeze(0).squeeze(0)>1.0-1e-5 ##     mask         ，      1  ，   mask  。
                 valid_mask = torch.logical_and(valid_mask,valid_mask_depth)
                 
                 pcd_target[valid_mask,:3]=sampled_world_xyz.permute(0,2,3,1).squeeze(0).squeeze(0)[valid_mask]
@@ -901,10 +901,10 @@ class Flow3D_Extraction:
         number_ = torch.sum(torch.logical_not(torch.isnan(time_pcd[:,:,:]).any(-1)),-1)
         plt.figure(1)
         plt.hist(number_.cpu().numpy(), bins=1000, density=0, facecolor="blue", edgecolor="black", alpha=0.7)
-        # 显示横轴标签
+        #       
         plt.xlabel("trajectory length")
         plt.yscale('log')
-        # 显示纵轴标签
+        #       
         plt.ylabel("frequency")
         # plt.show()
         plt.savefig(os.path.join(self.save_dir,f"histgram_{len(time_pcd)}"+'.jpg'))

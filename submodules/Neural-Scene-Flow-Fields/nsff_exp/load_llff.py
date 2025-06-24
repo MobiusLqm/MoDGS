@@ -100,7 +100,7 @@ def _load_data(basedir, start_frame, end_frame,
     # print(masks.shape)
     # sys.exit()
 
-    motion_coords = [] ## LQM : 有mask的位置。
+    motion_coords = [] ## LQM :  mask   。
     for i in range(masks.shape[-1]):
         mask = masks[:, :, i]
         coord_y, coord_x = np.where(mask > 0.1)

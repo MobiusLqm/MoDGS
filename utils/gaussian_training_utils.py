@@ -163,7 +163,7 @@ def get_depth_order_loss(render_depth,gt_depth,mask,method_name="sign_loss",pair
 
     elif method_name=="SingleImageDepthPerceptionintheWild" or method_name=="DepthRanking": ## https://arxiv.org/pdf/1604.03901.pdf
         loss = 0.0
-        threshold = (gt_depth.max()-gt_depth.min())/100 ## 分成 10 个区间，大于区间才考虑
+        threshold = (gt_depth.max()-gt_depth.min())/100 ##    10    ，       
         gt_depth=gt_depth[mask>0]## N,1
         render_depth=render_depth.squeeze(0)[mask>0]## N,1
         index1 = torch.randperm(gt_depth.shape[0])[:pair_num,]
@@ -184,7 +184,7 @@ def get_depth_order_loss(render_depth,gt_depth,mask,method_name="sign_loss",pair
 
     elif method_name=="tanh_threshold":
         # alpha = 100
-        ### 用 Tanh 来近似这个符号函数。
+        ###   Tanh          。
         gt_depth=gt_depth[mask>0]## N,1
         depthmax=gt_depth.max()
         depthmin=gt_depth.min()
@@ -279,7 +279,7 @@ def cotraining_report(tb_writer, iteration:int,loss_dict, elapsed, testing_itera
         CoTraining_Cams= scene.getCoTrainingCameras()
         train_cams = [CoTraining_Cams[idx % len(CoTraining_Cams)] for idx in range(0, len(CoTraining_Cams), 4)]
         validation_configs = (
-            {'name': 'test', 'cameras' : scene.getCoTestingCameras()[::30]},  ## LQM: TODO: 为了测试，先注释掉,for ICLR2025 rebuttal 
+            {'name': 'test', 'cameras' : scene.getCoTestingCameras()[::30]},  ## LQM: TODO:     ，    ,for ICLR2025 rebuttal 
                               {'name': 'train', 'cameras' : train_cams })
         
         for config in validation_configs:
@@ -311,7 +311,7 @@ def cotraining_report(tb_writer, iteration:int,loss_dict, elapsed, testing_itera
                     rendered_img,rendered_depth,rendered_alpha=rendered_pkg["render"],rendered_pkg["depth"],rendered_pkg["alpha"]        
                     image = torch.clamp(rendered_img, 0.0, 1.0)
                     gt_image = torch.clamp(viewpoint.original_image.to("cuda"), 0.0, 1.0)
-                    # if loss_dict["L2d_render_flow"] is not None and  config['name'] == 'train':  ### TODO： 现在是所有image 都加入训练，flow 有一点问题。flow是有间隔的。
+                    # if loss_dict["L2d_render_flow"] is not None and  config['name'] == 'train':  ### TODO：      image      ，flow      。flow     。
 
                     if config['name'] == 'test':
                         test_view_list.append(image)
@@ -515,7 +515,7 @@ def add_flow_to_tensorboard(flow_dict,writer,iteration,config_name,viewpoint_nam
                 continue
             if  not "mask" in k:
 
-                flow = v.permute(1, 2, 0)  ## TODO: 变不变换的区别是什么。
+                flow = v.permute(1, 2, 0)  ## TODO:           。
                 flow = flow.cpu().numpy()
                 flow_img = np.transpose(flow_viz.flow_to_image(flow),(2,0,1))
                 writer.add_images(config_name + "_view_{}/{}_flow".format(viewpoint_name,k), flow_img[None], global_step=iteration)
