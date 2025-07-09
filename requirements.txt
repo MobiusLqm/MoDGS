@@ -43,7 +43,7 @@ iopath==0.1.10
 ipykernel==6.16.2
 ipython-genutils==0.2.0
 ipywidgets==8.1.1
-isoduration==20.11.0av
+isoduration==20.11.0
 itsdangerous==2.1.2
 jaxtyping==0.2.12
 Jinja2==3.1.2
